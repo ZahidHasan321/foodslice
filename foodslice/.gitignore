@@ -1,0 +1,26 @@
+# Expo
+.expo
+__generated__
+web-build
+bare-apps
+
+# macOS
+.DS_Store
+
+# Node
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Ruby
+.direnv
+
+# Env
+.envrc.local
+.env
+
+.vscode
+
+.metro-health-check*
+
+
