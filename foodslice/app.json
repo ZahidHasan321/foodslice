@@ -4,9 +4,12 @@
     "slug": "foodslice",
     "version": "1.0.0",
     "scheme": "com.eas.foodslice",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "automatic",
+    "experiments": {
+      "tsconfigPaths": true
+    },
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
