@@ -1,70 +1,29 @@
+import RoundedButton from "@/components/button/roundedButton";
+import MyTextField from "@/components/textfield/customTextfield";
+import { useTheme } from "@react-navigation/native";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import React, { useState } from "react";
 import { Platform, StyleSheet } from "react-native";
 import {
+  responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Colors, Text, TextField, View } from "react-native-ui-lib";
+import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
-import MyTextField from "@/components/textfield/customTextfield";
-import { platform } from "os";
-import RoundedButton from "@/components/button/roundedButton";
-
-const styles = StyleSheet.create({
-  input: {
-    ...Platform.select({
-      android:{
-        width: responsiveWidth(70),
-      },
-      web:{
-        width: responsiveWidth(20),
-      }
-    })
-  },
-  parentContainer: {
-    backgroundColor: Colors.$backgroundDefault,
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  container: {
-    backgroundColor: Colors.$backgroundPrimaryLight,
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    borderRadius: 8,
-    ...Platform.select({
-      android: {
-        width:responsiveWidth(80),
-        height:responsiveHeight(50)
-      },
-      web:{
-        width:responsiveWidth(25),
-        height:responsiveHeight(50)
-      }
-    }),
-    shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 5,
-    },
-    shadowOpacity: 0.34,
-    shadowRadius: 8,
-    elevation: 10,
-  }
-});
 
 const Signup = () => {
+  const { colors } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
 
   const auth = getAuth(app);
 
   const handleSubmit = async () => {
     if (email && password && email.trim() !== "" && password.trim() !== "") {
+      if(password.trim() !== confirmPass.trim())
       createUserWithEmailAndPassword(auth, email.trim(), password.trim())
         .then((userCredential) => {
           // Signed in
@@ -75,38 +34,108 @@ const Signup = () => {
           const errorMessage = error.message;
           console.log(errorMessage);
         });
-    }
-    else{
-      console.log("String empty")
+    } else {
+      console.log("String empty");
     }
   };
+
+  const styles = StyleSheet.create({
+    input: {
+      ...Platform.select({
+        android: {
+          width: responsiveWidth(75),
+        },
+        web: {
+          width: responsiveWidth(20),
+        },
+      }),
+    },
+    parentContainer: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    container: {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      gap:30,
+      backgroundColor: colors.primary,
+      borderRadius: 8,
+      ...Platform.select({
+        android: {
+          width: responsiveWidth(85),
+          height: responsiveHeight(60),
+        },
+        web: {
+          width: responsiveWidth(25),
+          height: responsiveHeight(55),
+        },
+      }),
+      shadowColor: "#000",
+      shadowOffset: {
+        width: 0,
+        height: 5,
+      },
+      shadowOpacity: 0.34,
+      shadowRadius: 8,
+      elevation: 10,
+    },
+    header: {
+      ...Platform.select({
+        android: {
+          fontSize: responsiveFontSize(6),
+        },
+        web: {
+          fontSize: responsiveFontSize(3),
+        },
+      }),
+      color: colors.white,
+      marginBottom: "auto",
+      marginTop: 25,
+    },
+  });
 
   return (
     <SafeAreaView style={styles.parentContainer}>
       <View style={styles.container}>
-        <Text >Sign Up</Text>
+        <Text style={styles.header}>Sign Up</Text>
+
         <MyTextField
+          focusColor={colors.secondaryLight}
           value={email}
-          placeholder={Platform.OS === "web" ? "Email Address*" : ""}
-          validate={["required", "email"]}
-          validateMessage={["field is required", "Email is invalid"]}
+          placeholder={"Email Address*"}
           setValue={(value: string) => setEmail(value)}
           style={styles.input}
-          hint={Platform.OS === "android" ? "Email Address*" : ""}
         />
 
         <MyTextField
+          focusColor={colors.secondaryLight}
           value={password}
-          placeholder={Platform.OS === "web" ? "Password*" : ""}
-          validate={["required", (value) => value.length > 6]}
-          validateMessage={["field is required", "Password length needs to be 6"]}
+          placeholder={"Password*"}
           setValue={(value: string) => setPassword(value)}
           style={styles.input}
           secureTextEntry
-          hint={Platform.OS === "android" ? "Password*" : ""}
         />
 
-        <RoundedButton label="Submit" handlePress={handleSubmit}/>
+        <MyTextField
+          focusColor={colors.secondaryLight}
+          value={confirmPass}
+          placeholder={"Confirm Password*"}
+          setValue={(value: string) => setConfirmPass(value)}
+          style={styles.input}
+          secureTextEntry
+        />
+
+        <RoundedButton
+          buttonWidth={Platform.OS === "web" ? 20 : 70}
+          style={{ marginBottom:30, marginTop:20 }}
+          bgcolor={colors.secondary}
+          hoveredColor={colors.secondaryHeavy}
+          label="Submit"
+          handlePress={handleSubmit}
+        />
       </View>
     </SafeAreaView>
   );

@@ -1,15 +1,11 @@
 import { Link } from "expo-router";
-import {
-  GestureHandlerRootView
-} from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Colors, Text, View } from "react-native-ui-lib";
-import "./setup";
-require("../themes/foundationConfigs.tsx");
+import { Text, View } from "react-native-ui-lib";
+
 
 const App = () => {
   return (
-    <GestureHandlerRootView style={{flex:1}}>
+    
       <SafeAreaView>
         <View
           style={{
@@ -19,11 +15,10 @@ const App = () => {
             flexDirection: "column",
           }}
         >
-          <Text style={{ color: Colors.$textSuccess }}>Home</Text>
+          <Text >Home</Text>
           <Link href={"/login"}>Signin</Link>
         </View>
       </SafeAreaView>
-    </GestureHandlerRootView>
   );
 };
 
