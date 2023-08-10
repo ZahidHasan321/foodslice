@@ -11,8 +11,8 @@ type textfield = {
   setValue: any;
   placeholder: string;
   style?: any;
-  bgcolor?:string,
-  focusColor?:string
+  bgcolor?: string;
+  focusColor?: string;
   [x: string]: any;
 };
 
@@ -39,6 +39,7 @@ const MyTextField = ({
     input: {
       backgroundColor: bgcolor,
       borderRadius: 8,
+      borderWidth: 0,
       height: 50,
       padding: 10,
       shadowColor: "#000",
@@ -48,13 +49,7 @@ const MyTextField = ({
       },
       shadowOpacity: 0.2,
       shadowRadius: 8,
-      elevation: 4,
-    },
-    floatingPlaceholder: {
-      backgroundColor: "transparent",
-      height: 50,
-      paddingLeft: 10,
-      paddingTop: 15,
+      elevation: 4
     },
   });
 
@@ -68,6 +63,7 @@ const MyTextField = ({
         style,
       ]}
       placeholder={placeholder}
+      placeholderTextColor={"gray"}
       value={value}
       underlineColorAndroid="transparent"
       onChangeText={(value) => setValue(value)}

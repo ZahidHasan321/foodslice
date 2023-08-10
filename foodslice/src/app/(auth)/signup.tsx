@@ -4,6 +4,7 @@ import { useTheme } from "@react-navigation/native";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import React, { useState } from "react";
 import { Platform, StyleSheet } from "react-native";
+import Animated, { FadeIn } from "react-native-reanimated";
 import {
   responsiveFontSize,
   responsiveHeight,
@@ -18,12 +19,29 @@ const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [error, setError] = useState({ error: false, message: "" });
+  const [loading, isLoading] = useState();
+
+  const clearState = () => {
+    setEmail("");
+    setPassword("");
+    setConfirmPass("");
+    setTimeout(() => {
+      setError({ error: false, message: "" });
+    }, 3000);
+  };
 
   const auth = getAuth(app);
 
   const handleSubmit = async () => {
     if (email && password && email.trim() !== "" && password.trim() !== "") {
-      if(password.trim() !== confirmPass.trim())
+      if (password.trim() !== confirmPass.trim()) {
+        setError({ error: true, message: "Password doesn't match" });
+        clearState();
+        return;
+      }
+
+      //firebase signup function
       createUserWithEmailAndPassword(auth, email.trim(), password.trim())
         .then((userCredential) => {
           // Signed in
@@ -32,10 +50,12 @@ const Signup = () => {
         .catch((error) => {
           const errorCode = error.code;
           const errorMessage = error.message;
-          console.log(errorMessage);
+          setError({ error: true, message: errorMessage });
+          clearState();
         });
     } else {
-      console.log("String empty");
+      setError({ error: true, message: "Email or password cannot be empty" });
+      clearState();
     }
   };
 
@@ -47,6 +67,7 @@ const Signup = () => {
         },
         web: {
           width: responsiveWidth(20),
+          outlineStyle: 'none'
         },
       }),
     },
@@ -60,7 +81,7 @@ const Signup = () => {
       flexDirection: "column",
       justifyContent: "center",
       alignItems: "center",
-      gap:30,
+      gap: 30,
       backgroundColor: colors.primary,
       borderRadius: 8,
       ...Platform.select({
@@ -95,6 +116,12 @@ const Signup = () => {
       marginBottom: "auto",
       marginTop: 25,
     },
+    errorMessage: {
+      color: colors.error,
+      fontSize: 12,
+      alignSelf: "flex-start",
+      marginTop: 10,
+    },
   });
 
   return (
@@ -108,6 +135,7 @@ const Signup = () => {
           placeholder={"Email Address*"}
           setValue={(value: string) => setEmail(value)}
           style={styles.input}
+          keyboardType="email-address"
         />
 
         <MyTextField
@@ -116,26 +144,34 @@ const Signup = () => {
           placeholder={"Password*"}
           setValue={(value: string) => setPassword(value)}
           style={styles.input}
-          secureTextEntry
+          secureTextEntry={true}
         />
 
-        <MyTextField
-          focusColor={colors.secondaryLight}
-          value={confirmPass}
-          placeholder={"Confirm Password*"}
-          setValue={(value: string) => setConfirmPass(value)}
-          style={styles.input}
-          secureTextEntry
-        />
-
-        <RoundedButton
-          buttonWidth={Platform.OS === "web" ? 20 : 70}
-          style={{ marginBottom:30, marginTop:20 }}
-          bgcolor={colors.secondary}
-          hoveredColor={colors.secondaryHeavy}
-          label="Submit"
-          handlePress={handleSubmit}
-        />
+        <View>
+          <MyTextField
+            focusColor={colors.secondaryLight}
+            value={confirmPass}
+            placeholder={"Confirm Password*"}
+            setValue={(value: string) => setConfirmPass(value)}
+            style={styles.input}
+            secureTextEntry={true}
+          />
+          {error.error && (
+            <Animated.Text entering={FadeIn} style={styles.errorMessage}>
+              {error.message}
+            </Animated.Text>
+          )}
+        </View>
+        <View style={{ marginBottom: 35 }}>
+          <RoundedButton
+            buttonWidth={Platform.OS === "web" ? 20 : 75}
+            bgcolor={colors.secondary}
+            hoveredColor={colors.secondaryHeavy}
+            scaleFactor={1.1}
+            label="Submit"
+            handlePress={handleSubmit}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );

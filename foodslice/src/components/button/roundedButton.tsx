@@ -18,7 +18,8 @@ export type PressableState = Readonly<{
 type button = {
   label: string;
   handlePress: any;
-  buttonWidth: number | null;
+  buttonWidth?: number;
+  scaleFactor?:number;
   [x: string]: any;
 };
 
@@ -30,6 +31,7 @@ const RoundedButton = ({
   hoveredColor,
   buttonWidth,
   buttonHeight,
+  scaleFactor = 1,
   style,
   ...restProps
 }: button) => {
@@ -37,7 +39,7 @@ const RoundedButton = ({
 
   const uas = useAnimatedStyle(() => {
     return {
-      transform: [{ scale: withSpring(pressed.value ? 1.2 : 1) }],
+      transform: [{ scale: withSpring(pressed.value ? scaleFactor : 1) }],
     };
   });
   // const handleEvent = useAnimatedGestureHandler({
@@ -49,7 +51,7 @@ const RoundedButton = ({
   //   },
   // });
   const tapGesture = Gesture.Tap()
-    .onStart(() => {
+    .onBegin(() => {
       pressed.value = true;
     })
     .onEnd(() => {
