@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
+import { Link } from "expo-router";
 
 const Signup = () => {
   const { colors } = useTheme();
@@ -67,7 +68,7 @@ const Signup = () => {
         },
         web: {
           width: responsiveWidth(20),
-          outlineStyle: 'none'
+          outlineStyle: "none",
         },
       }),
     },
@@ -167,11 +168,19 @@ const Signup = () => {
             buttonWidth={Platform.OS === "web" ? 20 : 75}
             bgcolor={colors.secondary}
             hoveredColor={colors.secondaryHeavy}
+            fontColor={colors.text}
             scaleFactor={1.1}
             label="Submit"
+            fontSize={20}
             handlePress={handleSubmit}
           />
         </View>
+      </View>
+      <View style={{ display: "flex", flexDirection: "row", marginTop: 15 }}>
+        <Text style={{ color: colors.text }}>Already have an account? </Text>
+        <Link style={{ color: colors.link }} href={"/login"}>
+          Log In
+        </Link>
       </View>
     </SafeAreaView>
   );

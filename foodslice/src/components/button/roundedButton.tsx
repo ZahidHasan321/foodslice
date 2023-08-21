@@ -20,6 +20,8 @@ type button = {
   handlePress: any;
   buttonWidth?: number;
   scaleFactor?:number;
+  fontColor?:string;
+  fontSize?:number,
   [x: string]: any;
 };
 
@@ -31,6 +33,7 @@ const RoundedButton = ({
   hoveredColor,
   buttonWidth,
   buttonHeight,
+  fontSize,
   scaleFactor = 1,
   style,
   ...restProps
@@ -89,6 +92,7 @@ const RoundedButton = ({
     },
     label: {
       color: fontColor,
+      fontSize:fontSize
     },
     hovered: {
       backgroundColor: hoveredColor,

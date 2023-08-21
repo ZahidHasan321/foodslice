@@ -18,7 +18,8 @@ declare module '@react-navigation/native' {
       border: string;
       notification: string;
       white:string,
-      black:string
+      black:string,
+      link:string
     };
   };
   export function useTheme(): ExtendedTheme;

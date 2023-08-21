@@ -12,7 +12,8 @@ export const CustomLightTheme:ExtendedTheme = {
     secondaryLight: "#5ED4C6",
     error:'#FF0000',
     white:"#FFFFFF",
-    black:"#000000"
+    black:"#000000",
+    link:"#3366CC"
   },
 };
 
@@ -29,7 +30,7 @@ export const CustomDarkTheme:ExtendedTheme = {
     background:"#0D171C",
     error:'#FF0000',
     white:"#FFFFFF",
-    black:"#000000"
-
+    black:"#000000",
+    link:"#3366CC"
   },
 };
