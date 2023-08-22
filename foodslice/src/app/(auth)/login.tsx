@@ -1,27 +1,26 @@
 import RoundedButton from "@/components/button/roundedButton";
 import MyTextField from "@/components/textfield/customTextfield";
-import { useTheme } from "@react-navigation/native";
+
+import { useResponsiveProp, useTheme } from "@shopify/restyle";
+import { Link, router } from "expo-router";
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import { Platform, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import {
-  responsiveFontSize,
   responsiveHeight,
   responsiveWidth,
 } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
-import { Link, router } from "expo-router";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { LinearGradient } from "expo-linear-gradient";
 
 const Signup = () => {
   const { colors } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState({ error: false, message: "" });
-  const [loading, isLoading] = useState();
 
   const clearState = () => {
     setEmail("");
@@ -60,7 +59,7 @@ const Signup = () => {
           width: responsiveWidth(75),
         },
         web: {
-          width: responsiveWidth(20),
+          width: useResponsiveProp({ phone: 260, md: 360, lg: 360, xxl: 390 }),
           outlineStyle: "none",
         },
       }),
@@ -69,6 +68,7 @@ const Signup = () => {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
+      backgroundColor: colors.mainBackground,
     },
     container: {
       display: "flex",
@@ -84,8 +84,8 @@ const Signup = () => {
           height: responsiveHeight(60),
         },
         web: {
-          width: responsiveWidth(25),
-          height: responsiveHeight(55),
+          width: useResponsiveProp({ phone: 300, md: 400, lg: 450, xxl: 450 }),
+          height: 450,
         },
       }),
       shadowColor: "#000",
@@ -98,15 +98,8 @@ const Signup = () => {
       elevation: 10,
     },
     header: {
-      ...Platform.select({
-        android: {
-          fontSize: responsiveFontSize(6),
-        },
-        web: {
-          fontSize: responsiveFontSize(3),
-        },
-      }),
-      color: colors.white,
+      fontSize: 50,
+      color: colors.textWhite,
       marginBottom: "auto",
       marginTop: 25,
     },
@@ -142,11 +135,10 @@ const Signup = () => {
             secureTextEntry={true}
           />
 
-          {error.error && (
-            <Animated.Text entering={FadeIn} style={styles.errorMessage}>
-              {error.message}
-            </Animated.Text>
-          )}
+          <Animated.Text entering={FadeIn} style={styles.errorMessage}>
+            {error.message}
+          </Animated.Text>
+
           <Link style={{ color: colors.link, marginTop: 10 }} href={""}>
             Forgot Password?
           </Link>
@@ -154,13 +146,19 @@ const Signup = () => {
 
         <View style={{ marginBottom: 35 }}>
           <RoundedButton
-            buttonWidth={Platform.OS === "web" ? 20 : 75}
+            buttonWidth={useResponsiveProp({
+              phone: 260,
+              md: 360,
+              lg: 360,
+              xxl: 390,
+            })}
             bgcolor={colors.secondary}
             hoveredColor={colors.secondaryHeavy}
             scaleFactor={1.1}
             label="Submit"
             fontSize={20}
             handlePress={handleSubmit}
+            fontColor={colors.textWhite}
           />
         </View>
       </View>

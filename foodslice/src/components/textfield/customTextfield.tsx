@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
-import { TextInput } from "react-native-gesture-handler";
+import { TextField } from "react-native-ui-lib";
 
 export type textfieldState = Readonly<{
   isFocused: boolean;
@@ -49,12 +49,12 @@ const MyTextField = ({
       },
       shadowOpacity: 0.2,
       shadowRadius: 8,
-      elevation: 4
+      elevation: 4,
     },
   });
 
   return (
-    <TextInput
+    <TextField
       onFocus={handleFocus}
       onBlur={handleBlur}
       style={[
@@ -66,7 +66,7 @@ const MyTextField = ({
       placeholderTextColor={"gray"}
       value={value}
       underlineColorAndroid="transparent"
-      onChangeText={(value) => setValue(value)}
+      onChangeText={(value: string) => setValue(value)}
       {...props}
     />
   );

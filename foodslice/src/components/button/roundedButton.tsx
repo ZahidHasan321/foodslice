@@ -80,7 +80,7 @@ const RoundedButton = ({
       borderRadius: 8,
       elevation: 3,
       backgroundColor: bgcolor,
-      width: responsiveWidth(buttonWidth),
+      width: buttonWidth,
       height: 50,
       shadowColor: "#000",
       shadowOffset: {

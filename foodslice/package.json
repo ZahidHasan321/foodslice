@@ -32,7 +32,8 @@
     "react-native-snackbar": "^2.6.2",
     "react-native-ui-lib": "^7.6.1",
     "react-native-web": "~0.19.6",
-    "uuid": "^9.0.0"
+    "uuid": "^9.0.0",
+    "expo-linear-gradient": "~12.3.0"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
