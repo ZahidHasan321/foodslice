@@ -8,7 +8,7 @@ import { Platform, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
 import {
   responsiveHeight,
-  responsiveWidth
+  responsiveWidth,
 } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native-ui-lib";
@@ -66,7 +66,7 @@ const Signup = () => {
           width: responsiveWidth(75),
         },
         web: {
-          width: useResponsiveProp({phone: 260, md: 360, lg: 360, xxl: 390}),
+          width: useResponsiveProp({ phone: 260, md: 360, lg: 360, xxl: 390 }),
           outlineStyle: "none",
         },
       }),
@@ -91,7 +91,7 @@ const Signup = () => {
           height: responsiveHeight(60),
         },
         web: {
-          width: useResponsiveProp({phone: 300, md: 400, lg: 420, xxl: 450}),
+          width: useResponsiveProp({ phone: 300, md: 400, lg: 420, xxl: 450 }),
           height: 450,
         },
       }),
@@ -158,7 +158,12 @@ const Signup = () => {
         </View>
         <View style={{ marginBottom: 35 }}>
           <RoundedButton
-            buttonWidth={useResponsiveProp({phone: 260, md: 360, lg: 360, xxl: 390})}
+            buttonWidth={useResponsiveProp({
+              phone: 260,
+              md: 360,
+              lg: 360,
+              xxl: 390,
+            })}
             bgcolor={colors.secondary}
             hoveredColor={colors.secondaryHeavy}
             fontColor={colors.textWhite}
@@ -167,7 +172,6 @@ const Signup = () => {
             fontSize={20}
             handlePress={handleSubmit}
             secureTextEntry={true}
-            
           />
         </View>
       </View>
