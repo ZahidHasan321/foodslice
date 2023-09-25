@@ -6,7 +6,6 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from "react-native-reanimated";
-import { responsiveWidth } from "react-native-responsive-dimensions";
 import { Text } from "react-native-ui-lib";
 
 export type PressableState = Readonly<{

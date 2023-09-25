@@ -2,12 +2,12 @@ import { ThemeProvider } from "@shopify/restyle";
 import { Slot } from "expo-router";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import "./setup";
 
 import { Provider, useAuth } from "@/contexts/auth";
 import { darkTheme, lightTheme } from "@/themes/theme";
 import { setBackgroundColorAsync } from "expo-system-ui";
 import { Appearance } from "react-native";
+
 
 export default function Layout() {
   return (
@@ -21,11 +21,9 @@ function RootLayout() {
   const colorScheme = Appearance.getColorScheme();
 
 
-  console.log(colorScheme)
-
   setBackgroundColorAsync(
     colorScheme === "dark"
-      ? darkTheme.colors.mainBackground
+      ? lightTheme.colors.mainBackground
       : lightTheme.colors.mainBackground
   );
 

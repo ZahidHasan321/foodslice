@@ -13,6 +13,7 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
+import axios from "axios";
 
 const Signup = () => {
   const { colors } = useTheme();
@@ -20,8 +21,7 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [error, setError] = useState({ error: false, message: "" });
-  const [loading, isLoading] = useState();
-
+  
   const clearState = () => {
     setEmail("");
     setPassword("");
@@ -30,6 +30,7 @@ const Signup = () => {
       setError({ error: false, message: "" });
     }, 3000);
   };
+
 
   const auth = getAuth(app);
 
@@ -40,12 +41,22 @@ const Signup = () => {
         clearState();
         return;
       }
-
       //firebase signup function
       createUserWithEmailAndPassword(auth, email.trim(), password.trim())
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
+          
+          axios.post(process.env.EXPO_PUBLIC_API_URL + "/users",{
+           
+              uid: user.uid,
+              username: 'test',
+              admin: true,
+              isRegistered: false
+            
+          }).then(res => console.log(res))
+          .catch(e => console.log(e))
+
         })
         .catch((error) => {
           const errorCode = error.code;

@@ -1,30 +1,18 @@
-import { Link } from "expo-router";
-import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Text, View } from "react-native-ui-lib";
-import { getAuth, signOut } from "firebase/auth";
 import app from "@/configs/firebaseConfig";
-import { useTheme } from "@shopify/restyle";
+import { useAuth } from "@/contexts/auth";
+import { router } from "expo-router";
+import { getAuth } from "firebase/auth";
+import { useEffect } from "react";
+import { Text } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const App = () => {
   const auth = getAuth(app);
-  const theme = useTheme();
- 
+  const { user, userInfo, authInitialized } = useAuth();
+
   return (
     <SafeAreaView>
-      <View
-        style={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          flexDirection: "column",
-        }}
-      >
-        <Text style={{ color: theme.colors.text }}>Home</Text>
-        <Link style={{ color: theme.colors.textPrimary }} href={"/login"}>
-          Signin
-        </Link>
-        <Button onPress={() =>  signOut(auth)} label="signout" />
-      </View>
+      <Text>Home</Text>
     </SafeAreaView>
   );
 };

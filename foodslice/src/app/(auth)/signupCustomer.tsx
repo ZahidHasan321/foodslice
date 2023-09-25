@@ -1,9 +1,9 @@
 import RoundedButton from "@/components/button/roundedButton";
 import MyTextField from "@/components/textfield/customTextfield";
-
 import { useResponsiveProp, useTheme } from "@shopify/restyle";
-import { Link, router } from "expo-router";
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import axios from "axios";
+import { Link } from "expo-router";
+import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import React, { useState } from "react";
 import { Platform, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -14,50 +14,49 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
-import axios from "axios";
 
 const Signup = () => {
   const { colors } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
   const [error, setError] = useState({ error: false, message: "" });
+  const [loading, isLoading] = useState();
 
   const clearState = () => {
     setEmail("");
     setPassword("");
+    setConfirmPass("");
     setTimeout(() => {
       setError({ error: false, message: "" });
     }, 3000);
   };
 
+
   const auth = getAuth(app);
 
   const handleSubmit = async () => {
     if (email && password && email.trim() !== "" && password.trim() !== "") {
+      if (password.trim() !== confirmPass.trim()) {
+        setError({ error: true, message: "Password doesn't match" });
+        clearState();
+        return;
+      }
       //firebase signup function
-      signInWithEmailAndPassword(auth, email, password)
+      createUserWithEmailAndPassword(auth, email.trim(), password.trim())
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
-
-          axios
-          .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
-            params: {
+          
+          axios.post(process.env.EXPO_PUBLIC_API_URL + "/users",{
+           
               uid: user.uid,
-            },
-          })
-          .then((res) => {
-            if (res.data.admin) {
-              if (res.data.isRegistered) router.replace("/restaurant/home");
-              else router.replace("/restaurantRegistration");
-            } else {
-              router.replace("/customer/home");
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            signOut(auth);
-          });
+              username: 'test',
+              admin: false,
+              isRegistered: false
+            
+          }).then(res => console.log(res))
+          .catch(e => console.log(e))
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -103,7 +102,7 @@ const Signup = () => {
           height: responsiveHeight(60),
         },
         web: {
-          width: useResponsiveProp({ phone: 300, md: 400, lg: 450, xxl: 450 }),
+          width: useResponsiveProp({ phone: 300, md: 400, lg: 420, xxl: 450 }),
           height: 450,
         },
       }),
@@ -133,7 +132,7 @@ const Signup = () => {
   return (
     <SafeAreaView style={styles.parentContainer}>
       <View style={styles.container}>
-        <Text style={styles.header}>Sign In</Text>
+        <Text style={styles.header}>Sign Up</Text>
 
         <MyTextField
           focusColor={colors.secondaryLight}
@@ -144,25 +143,30 @@ const Signup = () => {
           keyboardType="email-address"
         />
 
+        <MyTextField
+          focusColor={colors.secondaryLight}
+          value={password}
+          placeholder={"Password*"}
+          setValue={(value: string) => setPassword(value)}
+          style={styles.input}
+          secureTextEntry={true}
+        />
+
         <View>
           <MyTextField
             focusColor={colors.secondaryLight}
-            value={password}
-            placeholder={"Password*"}
-            setValue={(value: string) => setPassword(value)}
+            value={confirmPass}
+            placeholder={"Confirm Password*"}
+            setValue={(value: string) => setConfirmPass(value)}
             style={styles.input}
             secureTextEntry={true}
           />
-
-          <Animated.Text entering={FadeIn} style={styles.errorMessage}>
-            {error.message}
-          </Animated.Text>
-
-          <Link style={{ color: colors.link, marginTop: 10 }} href={""}>
-            Forgot Password?
-          </Link>
+          {error.error && (
+            <Animated.Text entering={FadeIn} style={styles.errorMessage}>
+              {error.message}
+            </Animated.Text>
+          )}
         </View>
-
         <View style={{ marginBottom: 35 }}>
           <RoundedButton
             buttonWidth={useResponsiveProp({
@@ -173,18 +177,26 @@ const Signup = () => {
             })}
             bgcolor={colors.secondary}
             hoveredColor={colors.secondaryHeavy}
+            fontColor={colors.textWhite}
             scaleFactor={1.1}
             label="Submit"
             fontSize={20}
             handlePress={handleSubmit}
-            fontColor={colors.textWhite}
+            secureTextEntry={true}
           />
         </View>
       </View>
       <View style={{ display: "flex", flexDirection: "row", marginTop: 15 }}>
-        <Text style={{ color: colors.text }}>New to Foodslice? </Text>
-        <Link style={{ color: colors.link }} href={"/signupCustomer"}>
-          Join now
+        <Text style={{ color: colors.text }}>Already have an account? </Text>
+        <Link style={{ color: colors.link }} href={"/login"}>
+          Log In
+        </Link>
+      </View>
+
+      <View style={{ display: "flex", flexDirection: "row", marginTop: 15 }}>
+        <Text style={{ color: colors.text }}>Are you a restaurant owner? </Text>
+        <Link style={{ color: colors.link }} href={"/signupRestaurant"}>
+          go to restaurant
         </Link>
       </View>
     </SafeAreaView>
