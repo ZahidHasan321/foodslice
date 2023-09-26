@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts/auth";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "@shopify/restyle";
 import axios from "axios";
+import { Tabs } from "expo-router";
 import { useEffect, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import {
@@ -18,6 +19,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native-ui-lib";
+import SearchBar from "react-native-dynamic-search-bar";
 
 type ItemProps = {
   name: string;
@@ -40,34 +42,48 @@ type ItemProps = {
 // );
 
 const Item = ({ item, onPress }) => (
-  <Card>
+  <Card
+    style={{
+      width: responsiveWidth(100),
+      borderRadious: 2,
+      borderWidth: 0,
+      padding: 20,
+    }}
+  >
     <TouchableOpacity
       style={{
         display: "flex",
-        flex: 1,
-        flexDirection: "row",
-        justifyContent: "space-between",
-        width: responsiveWidth(100),
-        borderRadious: 2,
-        borderWidth: 0,
-        padding: 20,
+        flexDirection: "column",
       }}
     >
-      <Text>{item.name}</Text>
-      <Text>{item.price}</Text>
+      <View
+        style={{
+          display: "flex",
+          flex: 1,
+          flexDirection: "row",
+          justifyContent: "space-between",
+        }}
+      >
+        <Text>{item.name}</Text>
+        <Text>
+          {"\u0024"}
+          {item.price}
+        </Text>
+      </View>
+      <Text>{item.description}</Text>
     </TouchableOpacity>
   </Card>
 );
 
 const renderItem = (item) => {
   const backgroundColor = "#6e3b6e";
-  console.log(item.item);
   return <Item item={item.item} onPress={() => {}} />;
 };
 
 const Home = () => {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const [searchParam, setSearchParam] = useState("");
   const [modalVisibility, setModalVisibility] = useState(false);
   const [itemList, setItemList] = useState([]);
   const [itemInfo, setItemInfo] = useState({
@@ -77,44 +93,45 @@ const Home = () => {
     price: "",
     category: "",
   });
+  const [searchedData, setSearchedData] = useState([]);
 
   const handleFabButtonPress = () => {
     setModalVisibility(true);
   };
 
   useEffect(() => {
+    const cancelToken = axios.CancelToken.source();
+
     axios
-      .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
+      .get(process.env.EXPO_PUBLIC_API_URL + "/items/getItems", {
+        cancelToken: cancelToken.token,
         params: {
-          uid: user.uid,
+          id: user.uid,
         },
       })
-      .then((userInfo) => {
-        axios
-          .get(
-            process.env.EXPO_PUBLIC_API_URL +
-              "/restaurants/getRestaurantByUser",
-            {
-              params: {
-                owner: userInfo.data._id,
-              },
-            }
-          )
-          .then((res) => {
-            axios
-              .get(
-                process.env.EXPO_PUBLIC_API_URL + "/items/getItemByRestaurant",
-                {
-                  params: {
-                    id: res.data._id,
-                  },
-                }
-              )
-              .then((res) => setItemList(res.data))
-              .catch((e) => console.error(e));
-          });
+      .then((res) => {
+        setItemList(res.data);
+        setSearchedData(res.data);
+      })
+      .catch((e) => console.log(e));
+
+    return () => {
+      cancelToken.cancel();
+    };
+  }, []);
+
+  useEffect(() => {
+    if (searchParam !== "") {
+      const filteredData = searchedData.filter((item) => {
+        return item.name.toLowerCase().includes(searchParam.toLowerCase())
+          ? item
+          : null;
       });
-  }, [modalVisibility]);
+      setSearchedData(filteredData);
+    } else {
+      setSearchedData(itemList);
+    }
+  }, [searchParam]);
 
   const handleSubmit = () => {
     axios
@@ -144,7 +161,6 @@ const Home = () => {
               .then(() => setModalVisibility(!modalVisibility))
               .catch((e) => console.error(e));
           });
-          
       });
   };
 
@@ -157,7 +173,7 @@ const Home = () => {
       width: 70,
       position: "absolute",
       bottom: 0,
-      top: responsiveHeight(80),
+      top: responsiveHeight(70),
       right: 10,
       height: 70,
       backgroundColor: "#fff",
@@ -171,9 +187,20 @@ const Home = () => {
   });
   return (
     <SafeAreaView>
+      <Tabs.Screen
+        options={{
+          headerShown: false,
+        }}
+      />
+      <View style={{ marginTop: 10 }}>
+        <SearchBar
+          style={{height:50}}
+          onChangeText={(params) => setSearchParam(params.trim())}
+        />
+      </View>
       <View marginT-20>
         <FlatList
-          data={itemList}
+          data={searchedData}
           renderItem={renderItem}
           contentContainerStyle={{
             display: "flex",
@@ -195,12 +222,13 @@ const Home = () => {
         animationType="slide"
       >
         <TouchableOpacity onPress={() => setModalVisibility(!modalVisibility)}>
-          <Text
+          {/* <Text
             red20
             style={{ marginLeft: "auto", marginRight: 10, fontSize: 20 }}
           >
             Close
-          </Text>
+          </Text> */}
+          <Ionicons name="close" size={30} color={'red'} style={{ marginLeft: "auto", marginRight: 10, marginTop:5}}/>
         </TouchableOpacity>
         <View flex centerH>
           <Text text30 marginB-20>

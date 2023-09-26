@@ -41,23 +41,23 @@ const Signup = () => {
           const user = userCredential.user;
 
           axios
-          .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
-            params: {
-              uid: user.uid,
-            },
-          })
-          .then((res) => {
-            if (res.data.admin) {
-              if (res.data.isRegistered) router.replace("/restaurant/home");
-              else router.replace("/restaurantRegistration");
-            } else {
-              router.replace("/customer/home");
-            }
-          })
-          .catch((err) => {
-            console.log(err);
-            signOut(auth);
-          });
+            .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
+              params: {
+                uid: user.uid,
+              },
+            })
+            .then((res) => {
+              if (res.data.admin) {
+                if (res.data.isRegistered) router.replace("/restaurant/home");
+                else router.replace("/restaurantRegistration");
+              } else {
+                router.replace("/customer/home");
+              }
+            })
+            .catch((err) => {
+              console.log(err);
+              signOut(auth);
+            });
         })
         .catch((error) => {
           const errorCode = error.code;

@@ -40,7 +40,7 @@ export function Provider(props: any) {
       const inCustomerGroup = segments[0] === "customer";
       const inRestaurantGroup = segments[0] === "restaurant";
       const inRootFolder = segments.length === 0;
-      const inRegisterFile = segments[0] === 'restaurant' && segments[1] === 'restaurantRegistration'
+      const inRegisterFile = segments[0] === 'restaurantRegistration'
 
       if (!isNavigationReady) {
         return;
@@ -77,17 +77,16 @@ export function Provider(props: any) {
             // } else if (inRestaurantGroup && !res.data.admin) {
             //   router.replace("/customer/home");
             // }
-            console.log(res.data)
             if (res.data.admin) {
               if (res.data.isRegistered) {
                 if (inAuthGroup || inRootFolder || inCustomerGroup || inRegisterFile) {
                   router.replace("/restaurant/home");
                 }
               } else {
-                router.replace("/restaurant/restaurantRegistration");
+                router.replace("/restaurantRegistration");
               }
             } else {
-              if (inAuthGroup || inRootFolder || inRestaurantGroup) {
+              if (inAuthGroup || inRootFolder || inRestaurantGroup || inRegisterFile) {
                 router.replace("/customer/home");
               }
             }
