@@ -7,7 +7,7 @@ import { Provider, useAuth } from "@/contexts/auth";
 import { darkTheme, lightTheme } from "@/themes/theme";
 import { setBackgroundColorAsync } from "expo-system-ui";
 import { Appearance } from "react-native";
-
+import { MenuProvider } from "react-native-popup-menu";
 
 export default function Layout() {
   return (
@@ -19,7 +19,6 @@ export default function Layout() {
 
 function RootLayout() {
   const colorScheme = Appearance.getColorScheme();
-
 
   setBackgroundColorAsync(
     colorScheme === "dark"
@@ -33,11 +32,13 @@ function RootLayout() {
 
   return (
     <ThemeProvider theme={colorScheme === "dark" ? darkTheme : lightTheme}>
-      <GestureHandlerRootView style={{ flex: 1 }}>
-        <SafeAreaProvider>
-          <Slot />
-        </SafeAreaProvider>
-      </GestureHandlerRootView>
+      <MenuProvider>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+          <SafeAreaProvider>
+            <Slot />
+          </SafeAreaProvider>
+        </GestureHandlerRootView>
+      </MenuProvider>
     </ThemeProvider>
   );
 }

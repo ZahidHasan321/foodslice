@@ -15,9 +15,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true
     },
@@ -33,7 +31,13 @@
     },
     "plugins": [
       "expo-router",
-      "expo-build-properties"
+      "expo-build-properties",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Let foodlice to access your photos"
+        }
+      ]
     ]
   }
 }
