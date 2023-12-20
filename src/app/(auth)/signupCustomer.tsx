@@ -51,11 +51,11 @@ const Signup = () => {
           axios.post(process.env.EXPO_PUBLIC_API_URL + "/users",{
            
               uid: user.uid,
-              username: 'test',
+              username: user.displayName || 'not found',
               admin: false,
               isRegistered: false
             
-          }).then(res => console.log(res))
+          }).then(res => console.log(res.data))
           .catch(e => console.log(e))
         })
         .catch((error) => {

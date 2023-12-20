@@ -54,7 +54,7 @@ const Signup = () => {
               admin: true,
               isRegistered: false
             
-          }).then(res => console.log(res))
+          }).then(res => console.log(res.data))
           .catch(e => console.log(e))
 
         })

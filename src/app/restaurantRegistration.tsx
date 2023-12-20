@@ -4,7 +4,7 @@ import { useAuth } from "@/contexts/auth";
 import { useTheme } from "@shopify/restyle";
 import axios from "axios";
 import { router } from "expo-router";
-import { useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import {
   responsiveWidth
@@ -43,10 +43,11 @@ const Registration = () => {
         uid: user.uid
       })
       .then(res => {
-        console.log(res)
+        console.log(res.data)
+        router.replace('/restaurant/')
       })
 
-      router.replace('/')
+     
 
     })
   };
@@ -72,7 +73,7 @@ const Registration = () => {
         style={{
           alignSelf: "center",
           fontSize: 30,
-          fontWeight: 600,
+          fontWeight: '600',
           marginBottom: 30,
         }}
       >

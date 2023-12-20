@@ -2,6 +2,7 @@ import { Stack } from "expo-router";
 import Profile from "./profile";
 import { Text } from "react-native-ui-lib";
 import { useEffect, useState } from "react";
+import React from 'react'
 
 export default function AppLayout() {
   const [ searchEnabled, setSearchEnabled ] = useState(false);
@@ -12,7 +13,7 @@ export default function AppLayout() {
   },[search])
 
   return (
-    <Stack 
+    <Stack
       screenOptions={{
         title:null,
         headerLeft: (props) => !searchEnabled && <Profile/>,

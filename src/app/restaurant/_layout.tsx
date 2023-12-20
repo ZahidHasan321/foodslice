@@ -1,7 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
-import { useEffect, useState } from "react";
-import { Button } from "react-native-ui-lib";
+import React, { useEffect, useState } from "react";
+
+
 
 export default function AppLayout() {
   const [searchEnabled, setSearchEnabled] = useState(false);
@@ -30,15 +31,6 @@ export default function AppLayout() {
           tabBarIcon: () => <Ionicons name="person" size={24} />,
         }}
       />
-
-      <Tabs.Screen
-      name="[item]"
-      
-      options={{
-        headerShown:false,
-        href:null
-      }}
-       />
     </Tabs>
   );
 }

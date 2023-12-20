@@ -1,0 +1,222 @@
+import React, { useState } from "react";
+import { StyleSheet } from "react-native";
+import {
+  responsiveHeight,
+  responsiveWidth,
+} from "react-native-responsive-dimensions";
+import { SafeAreaView } from "react-native-safe-area-context";
+import {
+  Button,
+  Image,
+  Incubator,
+  Modal,
+  Text,
+  TextField,
+  TouchableOpacity,
+  View,
+} from "react-native-ui-lib";
+import * as ImagePicker from "expo-image-picker";
+import { useTheme } from "@shopify/restyle";
+import useImgBB from "@/app/hooks/useIMGBB";
+import { Toast } from "react-native-ui-lib/src/incubator";
+import axios from "axios";
+
+const styles = StyleSheet.create({
+  input: {
+    borderRadius: 8,
+    borderWidth: 0,
+    height: 50,
+    padding: 10,
+    borderBottomWidth: 2,
+    minWidth: 80,
+  },
+});
+
+const EditItem = ({ open, handleModalClose, item }) => {
+  const [editedItem, setEditedItem] = useState(item);
+  const { colors } = useTheme();
+
+  const [image, setImage] = useState(null);
+
+  const [isSuccess, setIsSuccess] = useState({
+    value: false,
+    message: "",
+  });
+
+  const [isError, setIsError] = useState({
+    value: false,
+    message: "",
+  });
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0]);
+    }
+  };
+
+  const clearState = () => {
+    setIsSuccess({ value: false, message: "" });
+    setIsError({ value: false, message: "" });
+  };
+
+  const handleSubmit = async () => {
+    if (
+      editedItem.name.trim() == "" ||
+      editedItem.price === null ||
+      editedItem.category.trim() == "" ||
+      editedItem.image === null ||
+      editedItem.ingredients.trim() == ""
+    ) {
+      setIsError({ value: true, message: "Field cannot be empty" });
+    } else {
+      const imageUrl = (await image)
+        ? await useImgBB(image.uri, editedItem.name)
+        : editedItem.image;
+
+      axios
+        .post(
+          process.env.EXPO_PUBLIC_API_URL + "/items/update-item",
+          { ...editedItem, image: imageUrl },
+          {
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        )
+        .then((res) => {
+          res.data.value ? setIsSuccess(res.data) : setIsError(res.data);
+        })
+        .catch((e) => console.error(e));
+    }
+  };
+
+  const handleModalState = () => {
+    handleModalClose(false);
+  };
+  return (
+    <Modal visible={open} onRequestClose={handleModalState}>
+      <SafeAreaView
+        style={{ flex: 1, display: "flex", flexDirection: "column" }}
+      >
+        <Image
+          source={{
+            uri: image?.uri || item?.image,
+          }}
+          style={{
+            height: responsiveHeight(30),
+            width: responsiveWidth(100),
+          }}
+        />
+
+        <TouchableOpacity
+          onPress={pickImage}
+          style={{ alignSelf: "flex-start" }}
+        >
+          <Text text70 style={{ color: colors.link }}>
+            Choose Image
+          </Text>
+        </TouchableOpacity>
+
+        {/* Name of item */}
+        <View
+          marginL-8
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            alignItems: "center",
+          }}
+        >
+          <Text text70 style={{ fontWeight: "bold" }}>
+            Name:
+          </Text>
+          <TextField
+            style={{ ...styles.input }}
+            defaultValue={item?.name}
+            value={editedItem?.name}
+            onChangeText={(value: string) => {
+              setEditedItem({ ...editedItem, name: value });
+            }}
+          />
+        </View>
+
+        {/* Price of item */}
+        <View
+          marginL-8
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            alignItems: "center",
+          }}
+        >
+          <Text text70 style={{ fontWeight: "bold" }}>
+            Price:
+          </Text>
+          <TextField
+            keyboardType="numeric"
+            style={{ ...styles.input }}
+            defaultValue={(item.price).toString()}
+            onChangeText={(value: string) => setEditedItem({...editedItem, price: parseInt(value)})}
+          />
+        </View>
+
+        <Button
+          label="Submit"
+          onPress={handleSubmit}
+          backgroundColor={colors.secondary}
+          size="large"
+          style={{
+            marginTop: 30,
+            marginBottom: 30,
+            width: 120,
+            alignSelf: "center",
+          }}
+        />
+      </SafeAreaView>
+
+      <Toast
+        message={isSuccess.value ? isSuccess.message : ""}
+        visible={isSuccess.value ? true : false}
+        position="top"
+        swipeable={true}
+        autoDismiss={2000}
+        onDismiss={() => clearState()}
+        zIndex={10}
+        preset={
+          isSuccess.value
+            ? Incubator.ToastPresets.SUCCESS
+            : Incubator.ToastPresets.FAILURE
+        }
+        containerStyle={{ top: 0 }}
+        centerMessage
+      />
+
+      <Toast
+        message={isError.value ? isError.message : ""}
+        visible={isError.value ? true : false}
+        position="top"
+        swipeable={true}
+        autoDismiss={2000}
+        zIndex={2}
+        onDismiss={() => clearState()}
+        preset={
+          isError.value
+            ? Incubator.ToastPresets.FAILURE
+            : Incubator.ToastPresets.SUCCESS
+        }
+        containerStyle={{ top: 0 }}
+        centerMessage
+      />
+    </Modal>
+  );
+};
+
+export default EditItem;

@@ -1,7 +1,7 @@
+
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
-import { router } from "expo-router";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Switch } from "react-native-gesture-handler";
 import {
   Menu,
@@ -10,31 +10,40 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { responsiveWidth } from "react-native-responsive-dimensions";
-import { Card, Text, View } from "react-native-ui-lib";
+import { Card, Image, Text, View } from "react-native-ui-lib";
+import EditItem from "../modal/editModal";
 const Buffer = require("buffer").Buffer;
 
 const ListItem = ({ item, refreshPage }) => {
   const [enabled, setEnabled] = useState(item.available);
- 
+  const [openEditModal, setOpenEditModal] = useState(false);
+  const [image, setImage ]= useState(item?.image)
+
   const handleDelete = () => {
-    axios.delete(process.env.EXPO_PUBLIC_API_URL + '/items/deleteItem', {
-      params:{
-        id:item._id
-      }
-    })
-    .then(res =>{
-      refreshPage();
-    })
-  }
+    axios
+      .delete(process.env.EXPO_PUBLIC_API_URL + "/items/deleteItem", {
+        params: {
+          id: item._id,
+        },
+      })
+      .then((res) => {
+        refreshPage();
+      });
+  };
 
   const handleAvailablity = () => {
-    setEnabled(!enabled)
+    setEnabled(!enabled);
 
-    axios.put(process.env.EXPO_PUBLIC_API_URL + '/items/updateAvailability', {
+    axios.put(process.env.EXPO_PUBLIC_API_URL + "/items/updateAvailability", {
       id: item._id,
-      value: !enabled
-    })
-  }
+      value: !enabled,
+    });
+  };
+
+  const handleModalClose = (flag: boolean) => {
+    setOpenEditModal(flag);
+  };
+
   
   return (
     <Card
@@ -47,9 +56,8 @@ const ListItem = ({ item, refreshPage }) => {
       }}
     >
       <Card.Image
-         source={{
-          uri:
-            'data:image/jpeg;base64,' + Buffer(item.img.data.data).toString("base64") //data.data in your case
+        source={{
+          uri: image
         }}
         style={{
           height: "100%",
@@ -57,11 +65,12 @@ const ListItem = ({ item, refreshPage }) => {
           borderTopRightRadius: 0,
           borderBottomLeftRadius: 10,
         }}
+        
       />
       <Card.Section
         content={[
           { text: item.name, text70: true },
-          { text: "\u0024" + item.price, opacity: 0.7 }
+          { text: "\u0024" + item.price, opacity: 0.7 },
         ]}
         contentStyle={{ paddingLeft: 10, alignItems: "flex-start" }}
       />
@@ -92,7 +101,7 @@ const ListItem = ({ item, refreshPage }) => {
           />
           <MenuOptions optionsContainerStyle={{ width: 100 }}>
             <MenuOption
-              onSelect={() => router.push(`/restaurant/${item._id}`)}
+              onSelect={() => setOpenEditModal(true)}
               style={{
                 display: "flex",
                 flexDirection: "row",
@@ -114,6 +123,7 @@ const ListItem = ({ item, refreshPage }) => {
         </Menu>
         <Switch value={enabled} onValueChange={handleAvailablity} />
       </View>
+      <EditItem open={openEditModal} handleModalClose={handleModalClose} item={item}/>
     </Card>
   );
 };

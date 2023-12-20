@@ -1,14 +1,13 @@
 import MyTextField from "@/components/textfield/customTextfield";
 import { useAuth } from "@/contexts/auth";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { Entypo } from "@expo/vector-icons";
 import { useTheme } from "@shopify/restyle";
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { responsiveWidth } from "react-native-responsive-dimensions";
-import mime from "mime";
 import {
   Button,
   Image,
@@ -18,8 +17,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native-ui-lib";
-import { Entypo } from "@expo/vector-icons";
 import { Toast } from "react-native-ui-lib/src/incubator";
+import { AntDesign } from "@expo/vector-icons";
 
 interface Props {
   handleModal: (value: boolean) => void;
@@ -63,33 +62,46 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
       image: null,
     });
   };
-  const createFormData = (uri) => {
-    const fileName = uri.split("/").pop();
-    const fileType = fileName.split(".").pop();
-    const newImageUri = "file:///" + uri.split("file:/").join("");
+  const uploadImage = async (uri) => {
+    try {
+      const formData = new FormData();
+      formData.append("image", {
+        uri,
+        type: "image/jpeg",
+        name: "image.jpg",
+      } as any);
 
-    const formData = new FormData();
+      const response = await axios.post(
+        "https://api.imgbb.com/1/upload",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+          params: {
+            key: process.env.EXPO_PUBLIC_IMGBB_API_KEY,
+          },
+        }
+      );
 
-    formData.append("image", {
-      uri: newImageUri,
-      type: mime.getType(newImageUri),
-      name: newImageUri.split("/").pop(),
-    } as any);
-
-    Object.entries(itemInfo).forEach(([key, value]) => {
-      if (key !== "image") formData.append(key, value);
-    });
-
-    return formData;
+      // Handle the response from ImgBB
+      if (response.data && response.data.data && response.data.data.url) {
+        const imageUrl = response.data.data.url;
+        return imageUrl;
+      } else {
+        console.error("Error uploading image to ImgBB");
+      }
+    } catch (error) {
+      console.error("Error uploading image: ", error);
+    }
   };
 
   const pickImage = async () => {
-    // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.All,
       allowsEditing: true,
       aspect: [4, 3],
-      quality: 0.5,
+      quality: 1,
     });
 
     if (!result.canceled) {
@@ -98,11 +110,11 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
   };
 
   const handleModelState = () => {
-    handleModal(false)
+    handleModal(false);
     clearState();
-  }
+  };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (
       itemInfo.name.trim() == "" ||
       itemInfo.price === null ||
@@ -112,7 +124,12 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
     ) {
       setIsError({ value: true, message: "Field cannot be empty" });
     } else {
-      const data = createFormData(itemInfo.image.uri);
+      const imageUrl = await uploadImage(itemInfo.image.uri);
+
+      if (typeof imageUrl !== "string") {
+        setIsError({value: true, message: "Image not found"});
+        return;
+      }
       axios
         .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
           params: {
@@ -120,14 +137,16 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
           },
         })
         .then((userInfo) => {
-          data.append("restaurant", userInfo.data._id);
           axios
-            .post(process.env.EXPO_PUBLIC_API_URL + "/items", data, {
-              headers: {
-                Accept: "application/json",
-                "Content-Type": "multipart/form-data",
-              },
-            })
+            .post(
+              process.env.EXPO_PUBLIC_API_URL + "/items",
+              { ...itemInfo, image: imageUrl, restaurant: userInfo.data._id },
+              {
+                headers: {
+                  Accept: "application/json",
+                },
+              }
+            )
             .then((res) => {
               res.data.value
                 ? (setIsSuccess(res.data), clearForm(), getItems())
@@ -161,12 +180,15 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
           onPress={handleModelState}
           style={{ alignSelf: "flex-end" }}
         >
-          <Text text50 marginR-10>
-            Close
-          </Text>
+          <AntDesign
+            name="closecircle"
+            size={24}
+            color="black"
+            style={{ marginRight: 10, marginTop: 10 }}
+          />
         </TouchableOpacity>
         <View flex centerH>
-          <Text text30 marginB-20>
+          <Text style={{ alignSelf: "flex-start" }} text40 marginB-20>
             Add item
           </Text>
           <MyTextField

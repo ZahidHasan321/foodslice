@@ -1,27 +1,27 @@
 import app from "@/configs/firebaseConfig";
 import axios from "axios";
 import { router, useRootNavigation, useSegments } from "expo-router";
-import { getAuth, onAuthStateChanged, signOut } from "firebase/auth";
-import React, { useEffect } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
+import React, { createContext, useContext, useEffect, useState } from "react";
 
-const AuthContext = React.createContext(null);
+const AuthContext = createContext(null);
 
 // This hook can be used to access the user info.
 export function useAuth() {
-  return React.useContext(AuthContext);
+  return useContext(AuthContext);
 }
 
 // This hook will protect the route access based on user authentication.
 
 export function Provider(props: any) {
-  const [user, setAuth] = React.useState(null);
-  const [userInfo, setUserInfo] = React.useState(null);
-  const [authInitialized, setAuthInitialized] = React.useState<boolean>(false);
+  const [user, setAuth] = useState(null);
+  const [isLoading, setLoading] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState<boolean>(false);
 
   function useProtectedRoute(user) {
     const segments = useSegments();
 
-    const [isNavigationReady, setNavigationReady] = React.useState(false);
+    const [isNavigationReady, setNavigationReady] = useState(false);
     const rootNavigation = useRootNavigation();
 
     useEffect(() => {
@@ -35,12 +35,12 @@ export function Provider(props: any) {
       };
     }, [rootNavigation]);
 
-    React.useEffect(() => {
+    useEffect(() => {
       const inAuthGroup = segments[0] === "(auth)";
       const inCustomerGroup = segments[0] === "customer";
       const inRestaurantGroup = segments[0] === "restaurant";
       const inRootFolder = segments.length === 0;
-      const inRegisterFile = segments[0] === 'restaurantRegistration'
+      const inRegisterFile = segments[0] === "restaurantRegistration";
 
       if (!isNavigationReady) {
         return;
@@ -54,6 +54,8 @@ export function Provider(props: any) {
         !inAuthGroup
       ) {
         // Redirect to the sign-in page.
+
+        setLoading(false);
         router.replace("/login");
       } else if (user) {
         const auth = getAuth(app);
@@ -65,34 +67,33 @@ export function Provider(props: any) {
             },
           })
           .then((res) => {
-            // if (inAuthGroup || inRootFolder) {
-            //   if (res.data.admin) {
-            //     if (res.data.isRegistered) router.replace("/restaurant/home");
-            //     else router.replace("/restaurant/restaurantRegistration");
-            //   } else {
-            //     router.replace("/customer/home");
-            //   }
-            // } else if (inCustomerGroup && res.data.admin) {
-            //   router.replace("/restaurant/home");
-            // } else if (inRestaurantGroup && !res.data.admin) {
-            //   router.replace("/customer/home");
-            // }
-            if (res.data.admin) {
-              if (res.data.isRegistered) {
-                if (inAuthGroup || inRootFolder || inCustomerGroup || inRegisterFile) {
+            if (res.data?.admin) {
+              if (res.data?.isRegistered) {
+                if (
+                  inAuthGroup ||
+                  inRootFolder ||
+                  inCustomerGroup ||
+                  inRegisterFile
+                ) {
                   router.replace("/restaurant/home");
                 }
               } else {
                 router.replace("/restaurantRegistration");
               }
             } else {
-              if (inAuthGroup || inRootFolder || inRestaurantGroup || inRegisterFile) {
+              if (
+                inAuthGroup ||
+                inRootFolder ||
+                inRestaurantGroup ||
+                inRegisterFile
+              ) {
                 router.replace("/customer/home");
               }
             }
+          })
+          .finally(() => {
+            setLoading(false);
           });
-
-        // Redirect away from the sign-in page.
       }
     }, [user, segments, authInitialized, isNavigationReady]);
   }
@@ -101,12 +102,8 @@ export function Provider(props: any) {
     const auth = getAuth(app);
     onAuthStateChanged(auth, (user) => {
       if (user) {
-        // User is signed in, see docs for a list of available properties
-
         setAuth(user);
-        // ...
       } else {
-        // User is signed out
         setAuth(null);
       }
       setAuthInitialized(true);
@@ -119,8 +116,8 @@ export function Provider(props: any) {
     <AuthContext.Provider
       value={{
         user,
-        userInfo,
         authInitialized,
+        isLoading,
       }}
     >
       {props.children}
