@@ -9,12 +9,14 @@ import { setBackgroundColorAsync } from "expo-system-ui";
 import React from "react";
 import { Appearance } from "react-native";
 import { MenuProvider } from "react-native-popup-menu";
+import Toast from "react-native-toast-message";
 
 
 export default function Layout() {
   return (
     <Provider>
       <RootLayout />
+      
     </Provider>
   );
 }

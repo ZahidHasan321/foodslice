@@ -1,24 +1,27 @@
 import MyTextField from "@/components/textfield/customTextfield";
+import restaurantCategories from "@/constants/foodCategory";
 import { useAuth } from "@/contexts/auth";
-import { Entypo } from "@expo/vector-icons";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useTheme } from "@shopify/restyle";
 import axios from "axios";
 import * as ImagePicker from "expo-image-picker";
+import _ from "lodash";
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { responsiveWidth } from "react-native-responsive-dimensions";
 import {
   Button,
+  Colors,
   Image,
   Incubator,
   Modal,
+  Picker,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native-ui-lib";
 import { Toast } from "react-native-ui-lib/src/incubator";
-import { AntDesign } from "@expo/vector-icons";
 
 interface Props {
   handleModal: (value: boolean) => void;
@@ -62,6 +65,8 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
       image: null,
     });
   };
+
+  
   const uploadImage = async (uri) => {
     try {
       const formData = new FormData();
@@ -127,7 +132,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
       const imageUrl = await uploadImage(itemInfo.image.uri);
 
       if (typeof imageUrl !== "string") {
-        setIsError({value: true, message: "Image not found"});
+        setIsError({ value: true, message: "Image not found" });
         return;
       }
       axios
@@ -163,6 +168,10 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
       marginBottom: 20,
     },
   });
+
+  const renderItem = (item, index) => {
+    return <Text key={index}>item</Text>;
+  };
   return (
     <Modal
       visible={modalVisibility}
@@ -208,7 +217,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
             }
             style={styles.textField}
           />
-
+          {/* 
           <MyTextField
             value={itemInfo.category}
             placeholder="category"
@@ -216,7 +225,37 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
               setItemInfo({ ...itemInfo, category: value })
             }
             style={styles.textField}
-          />
+          /> */}
+
+          <Picker
+            value={itemInfo.category}
+            placeholder={"category"}
+            enableModalBlur={false}
+            onChange={(item: string) =>
+              setItemInfo({ ...itemInfo, category: item })
+            }
+            style={{
+              height: 30,
+              marginBottom: 20,
+              width: responsiveWidth(70),
+              borderBottomWidth: 1
+            }}
+            showSearch
+            searchPlaceholder={"Search a category"}
+            searchStyle={{
+              color: Colors.blue30,
+              placeholderTextColor: Colors.grey50,
+            }}
+            topBarProps={{ title: "Categories" }}
+            useSafeArea
+            trailingAccessory={
+              <AntDesign name="down" size={20} color="black"/>
+            }
+          >
+            {_.map(restaurantCategories, (item, index) => (
+              <Picker.Item key={index} value={item} label={item} />
+            ))}
+          </Picker>
 
           <MyTextField
             value={itemInfo.ingredients}

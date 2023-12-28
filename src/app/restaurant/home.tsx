@@ -13,9 +13,7 @@ import {
   responsiveWidth,
 } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, View } from "react-native-ui-lib";
-
-
+import { Avatar, Button, View } from "react-native-ui-lib";
 
 const Home = () => {
   const { colors } = useTheme();
@@ -25,6 +23,8 @@ const Home = () => {
   const [itemList, setItemList] = useState([]);
   const [searchedData, setSearchedData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
+
+  const {logOut} = useAuth()
 
   const handleFabButtonPress = () => {
     setModalVisibility(true);
@@ -83,7 +83,6 @@ const Home = () => {
   const renderItem = (item) => {
     return <ListItem item={item.item} refreshPage={onRefresh} />;
   };
-  
 
   const styles = StyleSheet.create({
     fab: {
@@ -109,10 +108,27 @@ const Home = () => {
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
-      <View style={{ marginTop: 10 }}>
+      <View
+        style={{
+          marginTop: 10,
+          display: "flex",
+          flexDirection: "row",
+          gap: 10,
+          marginRight: 36,
+          marginLeft: 10,
+        }}
+      >
         <SearchBar
-          style={{ height: 50 }}
+          style={{ height: 50, minWidth: 60 }}
           onChangeText={(params) => setSearchParam(params)}
+        />
+        <Avatar
+          onPress={() => logOut()}
+          animate
+          source={{
+            uri: "https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
+          }}
+          label="DP"
         />
       </View>
       <View marginT-20>
@@ -121,12 +137,12 @@ const Home = () => {
           data={searchedData}
           renderItem={renderItem}
           contentContainerStyle={{
-            flex:1,
+            flex: 1,
             display: "flex",
             alignItems: "center",
             width: "100%",
             gap: 2,
-            minHeight:responsiveHeight(100)
+            minHeight: responsiveHeight(100),
           }}
           refreshControl={
             <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />

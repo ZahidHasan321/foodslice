@@ -1,13 +1,17 @@
+import React from "react";
 import app from "@/configs/firebaseConfig";
 import { getAuth, signOut } from "firebase/auth";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Button, Text } from "react-native-ui-lib";
+import { Button, Text, View } from "react-native-ui-lib";
+import { useAuth } from "@/contexts/auth";
 
 const Profile = () => { 
-    const auth = getAuth(app)
+    const { user } = useAuth()
     return(
-        <SafeAreaView>
-            <Button  label='sign out' onPress={() => signOut(auth)}/>
+        <SafeAreaView style={{flex:1 }}>
+             <View>
+                <Text>{user.displayName}</Text>
+             </View>
         </SafeAreaView>
     )
 }

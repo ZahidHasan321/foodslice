@@ -63,7 +63,6 @@ const Signup = () => {
           const errorCode = error.code;
           const errorMessage = error.message;
           setError({ error: true, message: errorMessage });
-          clearState();
         });
     } else {
       setError({ error: true, message: "Email or password cannot be empty" });

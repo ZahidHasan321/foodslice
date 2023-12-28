@@ -1,7 +1,7 @@
 import app from "@/configs/firebaseConfig";
 import axios from "axios";
 import { router, useRootNavigation, useSegments } from "expo-router";
-import { getAuth, onAuthStateChanged } from "firebase/auth";
+import { getAuth, onAuthStateChanged, signOut, updateProfile } from "firebase/auth";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext(null);
@@ -18,12 +18,27 @@ export function Provider(props: any) {
   const [isLoading, setLoading] = useState(true);
   const [authInitialized, setAuthInitialized] = useState<boolean>(false);
 
+  const auth = getAuth(app);
+
+  const updateUserProfile = (username: string, profilePicture: string) => {
+    return updateProfile(auth.currentUser, {
+      displayName: username,
+      photoURL: profilePicture
+    })
+  }
+
+  const logOut = () => {
+    return signOut(auth)
+  }
+
+
   function useProtectedRoute(user) {
-    const segments = useSegments();
+    const segments = useSegments()
 
     const [isNavigationReady, setNavigationReady] = useState(false);
     const rootNavigation = useRootNavigation();
 
+  
     useEffect(() => {
       const unsubscribe = rootNavigation?.addListener("state", (event) => {
         setNavigationReady(true);
@@ -58,7 +73,6 @@ export function Provider(props: any) {
         setLoading(false);
         router.replace("/login");
       } else if (user) {
-        const auth = getAuth(app);
 
         axios
           .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
@@ -118,6 +132,8 @@ export function Provider(props: any) {
         user,
         authInitialized,
         isLoading,
+        updateUserProfile,
+        logOut
       }}
     >
       {props.children}

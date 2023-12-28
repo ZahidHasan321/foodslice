@@ -1,8 +1,8 @@
-
 import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import axios from "axios";
 import React, { useState } from "react";
 import { Switch } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
 import {
   Menu,
   MenuOption,
@@ -10,14 +10,15 @@ import {
   MenuTrigger,
 } from "react-native-popup-menu";
 import { responsiveWidth } from "react-native-responsive-dimensions";
-import { Card, Image, Text, View } from "react-native-ui-lib";
+import { Card, Text, View } from "react-native-ui-lib";
 import EditItem from "../modal/editModal";
-const Buffer = require("buffer").Buffer;
+
 
 const ListItem = ({ item, refreshPage }) => {
   const [enabled, setEnabled] = useState(item.available);
   const [openEditModal, setOpenEditModal] = useState(false);
-  const [image, setImage ]= useState(item?.image)
+  const [image, setImage] = useState(item?.image);
+  const [isVisible, setIsVisible] = useState(false);
 
   const handleDelete = () => {
     axios
@@ -38,13 +39,16 @@ const ListItem = ({ item, refreshPage }) => {
       id: item._id,
       value: !enabled,
     });
+    Toast.show({
+      type: "success",
+      text1: "Changed",
+    });
   };
 
   const handleModalClose = (flag: boolean) => {
     setOpenEditModal(flag);
   };
 
-  
   return (
     <Card
       style={{
@@ -57,7 +61,7 @@ const ListItem = ({ item, refreshPage }) => {
     >
       <Card.Image
         source={{
-          uri: image
+          uri: image,
         }}
         style={{
           height: "100%",
@@ -65,7 +69,6 @@ const ListItem = ({ item, refreshPage }) => {
           borderTopRightRadius: 0,
           borderBottomLeftRadius: 10,
         }}
-        
       />
       <Card.Section
         content={[
@@ -89,7 +92,8 @@ const ListItem = ({ item, refreshPage }) => {
             color="black"
           />
         </TouchableOpacity> */}
-        <Menu>
+
+        <Menu >
           <MenuTrigger
             children={
               <MaterialCommunityIcons
@@ -99,14 +103,12 @@ const ListItem = ({ item, refreshPage }) => {
               />
             }
           />
-          <MenuOptions optionsContainerStyle={{ width: 100 }}>
+          <MenuOptions optionsContainerStyle={{ width: 100, borderRadius: 10, shadowRadius: 10 }}>
             <MenuOption
               onSelect={() => setOpenEditModal(true)}
               style={{
                 display: "flex",
                 flexDirection: "row",
-                borderBottomWidth: 1,
-                borderBottomColor: "#0505055c",
               }}
             >
               <Feather name="edit" size={20} color="black" />
@@ -121,9 +123,14 @@ const ListItem = ({ item, refreshPage }) => {
             </MenuOption>
           </MenuOptions>
         </Menu>
+        
         <Switch value={enabled} onValueChange={handleAvailablity} />
       </View>
-      <EditItem open={openEditModal} handleModalClose={handleModalClose} item={item}/>
+      <EditItem
+        open={openEditModal}
+        handleModalClose={handleModalClose}
+        item={item}
+      />
     </Card>
   );
 };

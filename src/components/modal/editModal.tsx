@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 import {
   responsiveHeight,
   responsiveWidth,
@@ -7,9 +8,11 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import {
   Button,
+  Colors,
   Image,
   Incubator,
   Modal,
+  Picker,
   Text,
   TextField,
   TouchableOpacity,
@@ -17,9 +20,12 @@ import {
 } from "react-native-ui-lib";
 import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "@shopify/restyle";
-import useImgBB from "@/app/hooks/useIMGBB";
-import { Toast } from "react-native-ui-lib/src/incubator";
 import axios from "axios";
+
+import { Toast } from "react-native-ui-lib/src/incubator";
+import useImgBB from "hooks/useIMGBB";
+import _ from "lodash";
+import restaurantCategories from "@/constants/foodCategory";
 
 const styles = StyleSheet.create({
   input: {
@@ -27,7 +33,6 @@ const styles = StyleSheet.create({
     borderWidth: 0,
     height: 50,
     padding: 10,
-    borderBottomWidth: 2,
     minWidth: 80,
   },
 });
@@ -163,8 +168,114 @@ const EditItem = ({ open, handleModalClose, item }) => {
           <TextField
             keyboardType="numeric"
             style={{ ...styles.input }}
-            defaultValue={(item.price).toString()}
-            onChangeText={(value: string) => setEditedItem({...editedItem, price: parseInt(value)})}
+            defaultValue={item.price.toString()}
+            onChangeText={(value: string) =>
+              setEditedItem({ ...editedItem, price: parseInt(value) })
+            }
+          />
+        </View>
+
+        {/* category of item */}
+
+        <View
+          marginL-8
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            gap:4,
+            alignItems: "center",
+          }}
+        >
+          <Text text70 style={{ fontWeight: "bold" }}>
+            Category:
+          </Text>
+          {/* <TextField
+            style={{ ...styles.input }}
+            defaultValue={item?.category}
+            value={editedItem?.category}
+            onChangeText={(value: string) => {
+              setEditedItem({ ...editedItem, category: value });
+            }}
+          /> */}
+
+          <Picker
+            value={editedItem.category}
+            placeholder={"category"}
+            defaultValue={editedItem.category}
+            enableModalBlur={false}
+            onChange={(item: string) =>
+              setEditedItem({ ...editedItem, category: item })
+            }
+            style={{
+              height: 30,
+              marginBottom: 20,
+              width: responsiveWidth(70),
+              borderBottomWidth: 1,
+            }}
+            showSearch
+            searchPlaceholder={"Search a category"}
+            searchStyle={{
+              color: Colors.blue30,
+              placeholderTextColor: Colors.grey50,
+            }}
+            topBarProps={{ title: "Categories" }}
+            useSafeArea
+            trailingAccessory={
+              <AntDesign name="down" size={20} color="black" />
+            }
+          >
+            {_.map(restaurantCategories, (item, index) => (
+              <Picker.Item key={index} value={item} label={item} />
+            ))}
+          </Picker>
+        </View>
+
+        <View
+          marginL-8
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            alignItems: "center",
+          }}
+        >
+          <Text text70 style={{ fontWeight: "bold" }}>
+            Ingredients:
+          </Text>
+          <TextField
+            style={{ ...styles.input }}
+            defaultValue={item?.ingredients}
+            value={editedItem?.ingredients}
+            multiline
+            numberOfLines={5}
+            onChangeText={(value: string) => {
+              setEditedItem({ ...editedItem, ingredients: value });
+            }}
+          />
+        </View>
+
+        <View
+          marginL-8
+          style={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+            alignItems: "center",
+          }}
+        >
+          <Text text70 style={{ fontWeight: "bold" }}>
+            Description:
+          </Text>
+          <TextField
+            style={{ ...styles.input }}
+            defaultValue={item?.description}
+            value={editedItem?.description}
+            multiline
+            numberOfLines={5}
+            onChangeText={(value: string) => {
+              setEditedItem({ ...editedItem, description: value });
+            }}
           />
         </View>
 

@@ -7,14 +7,25 @@ import { router } from "expo-router";
 import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import {
-  responsiveWidth
+  responsiveHeight,
+  responsiveWidth,
 } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Text } from "react-native-ui-lib";
+import { Button, Text, View } from "react-native-ui-lib";
+import MapView from "react-native-maps";
+import Map from "@/components/map/map";
 
 const Registration = () => {
   const { colors } = useTheme();
-  const { user } = useAuth()
+  const { user } = useAuth();
+  const [openMap, setOpenMap] = useState(false);
+
+  const [mapRegion, setmapRegion] = useState({
+    latitude: 37.78825,
+    longitude: -122.4324,
+    latitudeDelta: 0.0922,
+    longitudeDelta: 0.0421,
+  });
 
   const [restaurantInfo, setRestaurantInfo] = useState({
     name: "",
@@ -24,32 +35,30 @@ const Registration = () => {
 
   const handleSubmit = () => {
     axios
-    .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
-      params: {
-        uid: user.uid,
-      },
-    })
-    .then(res => {
-
-      axios.post(process.env.EXPO_PUBLIC_API_URL + '/restaurants/', {
-        ...restaurantInfo,
-        owner: res.data._id
+      .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
+        params: {
+          uid: user.uid,
+        },
       })
-      .then(res => {
-        console.log(res)
-      })
+      .then((res) => {
+        axios
+          .post(process.env.EXPO_PUBLIC_API_URL + "/restaurants/", {
+            ...restaurantInfo,
+            owner: res.data._id,
+          })
+          .then((res) => {
+            console.log(res);
+          });
 
-      axios.put(process.env.EXPO_PUBLIC_API_URL + '/users/updateReg', {
-        uid: user.uid
-      })
-      .then(res => {
-        console.log(res.data)
-        router.replace('/restaurant/')
-      })
-
-     
-
-    })
+        axios
+          .put(process.env.EXPO_PUBLIC_API_URL + "/users/updateReg", {
+            uid: user.uid,
+          })
+          .then((res) => {
+            console.log(res.data);
+            router.replace("/restaurant/");
+          });
+      });
   };
 
   const styles = StyleSheet.create({
@@ -73,8 +82,8 @@ const Registration = () => {
         style={{
           alignSelf: "center",
           fontSize: 30,
-          fontWeight: '600',
-          marginBottom: 30,
+          fontWeight: "600",
+          marginBottom: 20,
         }}
       >
         Register Restaurant
@@ -87,15 +96,16 @@ const Registration = () => {
         }
         style={styles.textField}
       />
-      <MyTextField
-        value={restaurantInfo.location}
-        placeholder="location"
-        setValue={(value: string) =>
-          setRestaurantInfo({ ...restaurantInfo, location: value })
-        }
-        style={styles.textField}
-      />
 
+      <View style={{display:'flex', flexDirection: 'column', gap: 10, marginBottom: 20}}>
+        <MapView
+          style={{ width: responsiveWidth(80), height: responsiveHeight(40) }}
+        />
+
+        <Button onPress={() => setOpenMap(true)} label="Select location" />
+      </View>
+
+      <Map open={openMap} closeMap={() => setOpenMap(false)} />
       <MyTextField
         value={restaurantInfo.type}
         placeholder="type"
