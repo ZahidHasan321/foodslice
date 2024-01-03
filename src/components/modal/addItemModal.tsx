@@ -10,6 +10,7 @@ import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import { responsiveWidth } from "react-native-responsive-dimensions";
+import Toast from "react-native-toast-message";
 import {
   Button,
   Colors,
@@ -19,9 +20,8 @@ import {
   Picker,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native-ui-lib";
-import { Toast } from "react-native-ui-lib/src/incubator";
 
 interface Props {
   handleModal: (value: boolean) => void;
@@ -40,20 +40,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
     category: "",
     image: null,
   });
-  const [isSuccess, setIsSuccess] = useState({
-    value: false,
-    message: "",
-  });
 
-  const [isError, setIsError] = useState({
-    value: false,
-    message: "",
-  });
-
-  const clearState = () => {
-    setIsSuccess({ value: false, message: "" });
-    setIsError({ value: false, message: "" });
-  };
 
   const clearForm = () => {
     setItemInfo({
@@ -66,7 +53,6 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
     });
   };
 
-  
   const uploadImage = async (uri) => {
     try {
       const formData = new FormData();
@@ -94,10 +80,16 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
         const imageUrl = response.data.data.url;
         return imageUrl;
       } else {
-        console.error("Error uploading image to ImgBB");
+        Toast.show({
+          type:'error',
+          text1:"Error uploading image to ImgBB"
+        })
       }
     } catch (error) {
-      console.error("Error uploading image: ", error);
+      Toast.show({
+        type:'error',
+        text1: "Error uploading image: " +  error
+      })
     }
   };
 
@@ -116,7 +108,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
 
   const handleModelState = () => {
     handleModal(false);
-    clearState();
+
   };
 
   const handleSubmit = async () => {
@@ -127,12 +119,12 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
       itemInfo.image === null ||
       itemInfo.ingredients.trim() == ""
     ) {
-      setIsError({ value: true, message: "Field cannot be empty" });
+      Toast.show({ type:'error', text1: "Field cannot be empty" });
     } else {
       const imageUrl = await uploadImage(itemInfo.image.uri);
 
       if (typeof imageUrl !== "string") {
-        setIsError({ value: true, message: "Image not found" });
+        Toast.show({ type: 'error', text1: "Image not found" });
         return;
       }
       axios
@@ -144,7 +136,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
         .then((userInfo) => {
           axios
             .post(
-              process.env.EXPO_PUBLIC_API_URL + "/items",
+              process.env.EXPO_PUBLIC_API_URL + "/items/post-item",
               { ...itemInfo, image: imageUrl, restaurant: userInfo.data._id },
               {
                 headers: {
@@ -154,8 +146,11 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
             )
             .then((res) => {
               res.data.value
-                ? (setIsSuccess(res.data), clearForm(), getItems())
-                : setIsError(res.data);
+                ? (Toast.show({type:'success', text1: res.data.message}), clearForm(), getItems())
+                : Toast.show({
+                  type: 'error',
+                  text1:res.data.message
+                });
             })
             .catch((e) => console.error(e));
         });
@@ -179,6 +174,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
       animationType="slide"
     >
       <ScrollView
+        automaticallyAdjustKeyboardInsets
         contentContainerStyle={{
           display: "flex",
           flexDirection: "column",
@@ -238,7 +234,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
               height: 30,
               marginBottom: 20,
               width: responsiveWidth(70),
-              borderBottomWidth: 1
+              borderBottomWidth: 1,
             }}
             showSearch
             searchPlaceholder={"Search a category"}
@@ -249,7 +245,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
             topBarProps={{ title: "Categories" }}
             useSafeArea
             trailingAccessory={
-              <AntDesign name="down" size={20} color="black"/>
+              <AntDesign name="down" size={20} color="black" />
             }
           >
             {_.map(restaurantCategories, (item, index) => (
@@ -320,40 +316,8 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
             style={{ marginTop: 30, marginBottom: 30 }}
           />
         </View>
+        <Toast/>
       </ScrollView>
-      <Toast
-        message={isSuccess.value ? isSuccess.message : ""}
-        visible={isSuccess.value ? true : false}
-        position="top"
-        swipeable={true}
-        autoDismiss={2000}
-        onDismiss={() => clearState()}
-        zIndex={10}
-        preset={
-          isSuccess.value
-            ? Incubator.ToastPresets.SUCCESS
-            : Incubator.ToastPresets.FAILURE
-        }
-        containerStyle={{ top: 0 }}
-        centerMessage
-      />
-
-      <Toast
-        message={isError.value ? isError.message : ""}
-        visible={isError.value ? true : false}
-        position="top"
-        swipeable={true}
-        autoDismiss={2000}
-        zIndex={2}
-        onDismiss={() => clearState()}
-        preset={
-          isError.value
-            ? Incubator.ToastPresets.FAILURE
-            : Incubator.ToastPresets.SUCCESS
-        }
-        containerStyle={{ top: 0 }}
-        centerMessage
-      />
     </Modal>
   );
 };

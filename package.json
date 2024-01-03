@@ -34,6 +34,7 @@
     "react-native-animated-spinkit": "^1.5.2",
     "react-native-dynamic-search-bar": "github:WrathChaos/react-native-dynamic-search-bar#expo",
     "react-native-gesture-handler": "~2.12.0",
+    "react-native-maps": "1.7.1",
     "react-native-mime-types": "^2.4.0",
     "react-native-popup-menu": "^0.16.1",
     "react-native-reanimated": "~3.3.0",
@@ -43,8 +44,7 @@
     "react-native-snackbar": "^2.6.2",
     "react-native-toast-message": "^2.2.0",
     "react-native-ui-lib": "^7.8.0",
-    "react-native-web": "~0.19.6",
-    "react-native-maps": "1.7.1"
+    "react-native-web": "~0.19.6"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",

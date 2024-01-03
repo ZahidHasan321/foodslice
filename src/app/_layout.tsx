@@ -41,6 +41,7 @@ function RootLayout() {
         <GestureHandlerRootView style={{ flex: 1 }}>
           <SafeAreaProvider>
             <Slot />
+            <Toast />
           </SafeAreaProvider>
         </GestureHandlerRootView>
       </MenuProvider>

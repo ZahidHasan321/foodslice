@@ -14,49 +14,52 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
 import axios from "axios";
+import Toast from "react-native-toast-message";
 
 const Signup = () => {
   const { colors } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUserName] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
   const [error, setError] = useState({ error: false, message: "" });
-  
+
   const clearState = () => {
     setEmail("");
     setPassword("");
     setConfirmPass("");
-    setTimeout(() => {
-      setError({ error: false, message: "" });
-    }, 3000);
+    setUserName("");
   };
-
 
   const auth = getAuth(app);
 
   const handleSubmit = async () => {
-    if (email && password && email.trim() !== "" && password.trim() !== "") {
+    if (
+      email &&
+      password &&
+      username &&
+      email.trim() !== "" &&
+      password.trim() !== ""
+    ) {
       if (password.trim() !== confirmPass.trim()) {
-        setError({ error: true, message: "Password doesn't match" });
+        Toast.show({ type: "error", text1: "Password doesn't match"  });
         clearState();
         return;
       }
-      //firebase signup function
+
       createUserWithEmailAndPassword(auth, email.trim(), password.trim())
         .then((userCredential) => {
-          // Signed in
           const user = userCredential.user;
-          
-          axios.post(process.env.EXPO_PUBLIC_API_URL + "/users",{
-           
-              uid: user.uid,
-              username: 'test',
-              admin: true,
-              isRegistered: false
-            
-          }).then(res => console.log(res.data))
-          .catch(e => console.log(e))
 
+          axios
+            .post(process.env.EXPO_PUBLIC_API_URL + "/users", {
+              uid: user.uid,
+              username: username,
+              admin: true,
+              isRegistered: false,
+            })
+            .then((res) => console.log(res.data))
+            .catch((e) => console.log(e));
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -65,7 +68,7 @@ const Signup = () => {
           clearState();
         });
     } else {
-      setError({ error: true, message: "Email or password cannot be empty" });
+      Toast.show({ type: "error", text1: "Email or password cannot be empty" });
       clearState();
     }
   };
@@ -136,6 +139,14 @@ const Signup = () => {
 
         <MyTextField
           focusColor={colors.secondaryLight}
+          value={username}
+          placeholder={"Username*"}
+          setValue={(value: string) => setUserName(value)}
+          style={styles.input}
+        />
+
+        <MyTextField
+          focusColor={colors.secondaryLight}
           value={email}
           placeholder={"Email Address*"}
           setValue={(value: string) => setEmail(value)}
@@ -161,11 +172,6 @@ const Signup = () => {
             style={styles.input}
             secureTextEntry={true}
           />
-          {error.error && (
-            <Animated.Text entering={FadeIn} style={styles.errorMessage}>
-              {error.message}
-            </Animated.Text>
-          )}
         </View>
         <View style={{ marginBottom: 35 }}>
           <RoundedButton

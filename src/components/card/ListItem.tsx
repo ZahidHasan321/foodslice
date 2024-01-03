@@ -41,7 +41,7 @@ const ListItem = ({ item, refreshPage }) => {
     });
     Toast.show({
       type: "success",
-      text1: "Changed",
+      text1: "Changed item availability",
     });
   };
 

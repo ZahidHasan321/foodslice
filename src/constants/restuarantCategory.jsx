@@ -1,0 +1,32 @@
+const restaurantTypes = [
+    'Italian',
+    'Mexican',
+    'Japanese',
+    'Indian',
+    'Mediterranean',
+    'Chinese',
+    'American',
+    'French',
+    'Thai',
+    'Spanish',
+    'Greek',
+    'Vietnamese',
+    'Vegetarian/Vegan',
+    'Seafood',
+    'Steakhouse',
+    'Sushi',
+    'Barbecue',
+    'Burger Joint',
+    'Fast Food',
+    'Pizza',
+    'Food Truck',
+    'Buffet',
+    'Café',
+    'Diner',
+    'Pub',
+    'Tapas',
+    'Fusion',
+  ];
+  
+  export default restaurantTypes;
+  

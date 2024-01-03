@@ -8,12 +8,13 @@ import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import SearchBar from "react-native-dynamic-search-bar";
 import { RefreshControl } from "react-native-gesture-handler";
+import { Menu, MenuOption, MenuOptions, MenuTrigger } from "react-native-popup-menu";
 import {
   responsiveHeight,
   responsiveWidth,
 } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Avatar, Button, View } from "react-native-ui-lib";
+import { Avatar, Button, Text, View } from "react-native-ui-lib";
 
 const Home = () => {
   const { colors } = useTheme();
@@ -122,14 +123,23 @@ const Home = () => {
           style={{ height: 50, minWidth: 60 }}
           onChangeText={(params) => setSearchParam(params)}
         />
-        <Avatar
-          onPress={() => logOut()}
-          animate
-          source={{
-            uri: "https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
-          }}
-          label="DP"
-        />
+        <Menu>
+            <MenuTrigger
+              children={
+                <Avatar
+                animate
+                  source={{
+                    uri: "https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
+                  }}
+                />
+              }
+            />
+            <MenuOptions optionsContainerStyle={{width: 'auto'}}>
+              <MenuOption>
+              <Text onPress={() => logOut()} style={{ marginLeft: 10, height: 24, fontSize: 16 }}>Logout</Text>
+              </MenuOption>
+            </MenuOptions>
+          </Menu>
       </View>
       <View marginT-20>
         <FlatList
