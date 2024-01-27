@@ -3,14 +3,19 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { Tabs } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Text } from "react-native";
-import { Menu, MenuOption, MenuOptions, MenuTrigger } from "react-native-popup-menu";
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from "react-native-popup-menu";
 import { Avatar } from "react-native-ui-lib/src/components/avatar";
 
 export default function AppLayout() {
   const [searchEnabled, setSearchEnabled] = useState(false);
   const [search, setSearch] = useState("");
 
-  const { logOut } = useAuth()
+  const { user, logOut } = useAuth();
   useEffect(() => {}, [search]);
 
   return (
@@ -21,16 +26,21 @@ export default function AppLayout() {
             <MenuTrigger
               children={
                 <Avatar
-                animate
+                  animate
                   source={{
-                    uri: "https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
+                    uri: user.photoURL ||"https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
                   }}
                 />
               }
             />
-            <MenuOptions optionsContainerStyle={{width: 'auto'}}>
+            <MenuOptions optionsContainerStyle={{ width: "auto" }}>
               <MenuOption>
-              <Text onPress={() => logOut()} style={{ marginLeft: 10, height: 24, fontSize: 16 }}>Logout</Text>
+                <Text
+                  onPress={() => logOut()}
+                  style={{ marginLeft: 10, height: 24, fontSize: 16 }}
+                >
+                  Logout
+                </Text>
               </MenuOption>
             </MenuOptions>
           </Menu>
@@ -54,6 +64,13 @@ export default function AppLayout() {
         name="profile"
         options={{
           tabBarIcon: () => <Ionicons name="person" size={24} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="chatList"
+        options={{
+          tabBarIcon: () => <Ionicons name="chatbox" size={24} />,
         }}
       />
     </Tabs>

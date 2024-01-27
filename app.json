@@ -37,6 +37,12 @@
         {
           "photosPermission": "Let foodlice to access your photos"
         }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Allow foodslice to use your location."
+        }
       ]
     ]
   }

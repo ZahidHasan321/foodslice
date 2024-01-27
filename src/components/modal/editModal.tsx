@@ -23,9 +23,10 @@ import { useTheme } from "@shopify/restyle";
 import axios from "axios";
 
 import { Toast } from "react-native-ui-lib/src/incubator";
-import useImgBB from "hooks/useIMGBB";
+
 import _ from "lodash";
 import restaurantCategories from "@/constants/foodCategory";
+import useImgBB from "@/hooks/useIMGBB";
 
 const styles = StyleSheet.create({
   input: {

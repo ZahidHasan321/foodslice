@@ -2,8 +2,8 @@ import RoundedButton from "@/components/button/roundedButton";
 import MyTextField from "@/components/textfield/customTextfield";
 
 import { useResponsiveProp, useTheme } from "@shopify/restyle";
-import { Link, router } from "expo-router";
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { Link } from "expo-router";
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 import React, { useState } from "react";
 import { Platform, StyleSheet } from "react-native";
 import Animated, { FadeIn } from "react-native-reanimated";
@@ -14,7 +14,6 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
-import axios from "axios";
 
 const Signup = () => {
   const { colors } = useTheme();
@@ -40,24 +39,24 @@ const Signup = () => {
           // Signed in
           const user = userCredential.user;
 
-          axios
-            .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
-              params: {
-                uid: user.uid,
-              },
-            })
-            .then((res) => {
-              if (res.data.admin) {
-                if (res.data.isRegistered) router.replace("/restaurant/home");
-                else router.replace("/restaurantRegistration");
-              } else {
-                router.replace("/customer/home");
-              }
-            })
-            .catch((err) => {
-              console.log(err);
-              signOut(auth);
-            });
+          // axios
+          //   .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
+          //     params: {
+          //       uid: user.uid,
+          //     },
+          //   })
+          //   .then((res) => {
+          //     if (res.data.admin) {
+          //       if (res.data.isRegistered) router.replace("/restaurant/home");
+          //       else router.replace("/restaurantRegistration");
+          //     } else {
+          //       router.replace("/customer/home");
+          //     }
+          //   })
+          //   .catch((err) => {
+          //     console.log(err);
+          //     signOut(auth);
+          //   });
         })
         .catch((error) => {
           const errorCode = error.code;

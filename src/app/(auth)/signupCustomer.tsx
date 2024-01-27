@@ -2,7 +2,7 @@ import RoundedButton from "@/components/button/roundedButton";
 import MyTextField from "@/components/textfield/customTextfield";
 import { useResponsiveProp, useTheme } from "@shopify/restyle";
 import axios from "axios";
-import { Link } from "expo-router";
+import { Link, useNavigation } from "expo-router";
 import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
 import React, { useState } from "react";
 import { Platform, StyleSheet } from "react-native";
@@ -14,14 +14,21 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
+import { useAuth } from "@/contexts/auth";
 
 const Signup = () => {
   const { colors } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [username, setUserName] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [profilePicture, setProfilePicture] = useState("")
   const [error, setError] = useState({ error: false, message: "" });
-  const [loading, isLoading] = useState();
+  const navigator = useNavigation()
+
+  const { updateUserProfile } = useAuth();
+
+
 
   const clearState = () => {
     setEmail("");
@@ -47,11 +54,13 @@ const Signup = () => {
         .then((userCredential) => {
           // Signed in
           const user = userCredential.user;
+
+          updateUserProfile(username, null);
           
           axios.post(process.env.EXPO_PUBLIC_API_URL + "/users",{
            
               uid: user.uid,
-              username: user.displayName || 'not found',
+              username: username || 'not found',
               admin: false,
               isRegistered: false
             
@@ -99,7 +108,7 @@ const Signup = () => {
       ...Platform.select({
         android: {
           width: responsiveWidth(85),
-          height: responsiveHeight(60),
+          height: responsiveHeight(70),
         },
         web: {
           width: useResponsiveProp({ phone: 300, md: 400, lg: 420, xxl: 450 }),
@@ -133,6 +142,15 @@ const Signup = () => {
     <SafeAreaView style={styles.parentContainer}>
       <View style={styles.container}>
         <Text style={styles.header}>Sign Up</Text>
+
+
+        <MyTextField
+          focusColor={colors.secondaryLight}
+          value={username}
+          placeholder={"Username*"}
+          setValue={(value: string) => setUserName(value)}
+          style={styles.input}
+        />
 
         <MyTextField
           focusColor={colors.secondaryLight}
@@ -196,7 +214,7 @@ const Signup = () => {
       <View style={{ display: "flex", flexDirection: "row", marginTop: 15 }}>
         <Text style={{ color: colors.text }}>Are you a restaurant owner? </Text>
         <Link style={{ color: colors.link }} href={"/signupRestaurant"}>
-          go to restaurant
+          sign up as restaurant
         </Link>
       </View>
     </SafeAreaView>

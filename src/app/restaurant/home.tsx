@@ -2,13 +2,19 @@ import ListItem from "@/components/card/ListItem";
 import AddItemModal from "@/components/modal/addItemModal";
 import { useAuth } from "@/contexts/auth";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useTheme } from "@shopify/restyle";
 import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { FlatList, StyleSheet } from "react-native";
 import SearchBar from "react-native-dynamic-search-bar";
 import { RefreshControl } from "react-native-gesture-handler";
-import { Menu, MenuOption, MenuOptions, MenuTrigger } from "react-native-popup-menu";
+import {
+  Menu,
+  MenuOption,
+  MenuOptions,
+  MenuTrigger,
+} from "react-native-popup-menu";
 import {
   responsiveHeight,
   responsiveWidth,
@@ -18,20 +24,41 @@ import { Avatar, Button, Text, View } from "react-native-ui-lib";
 
 const Home = () => {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, logOut } = useAuth();
   const [searchParam, setSearchParam] = useState("");
   const [modalVisibility, setModalVisibility] = useState(false);
   const [itemList, setItemList] = useState([]);
   const [searchedData, setSearchedData] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const {logOut} = useAuth()
-
   const handleFabButtonPress = () => {
     setModalVisibility(true);
   };
 
-  const getItemsFromAPI = () => {
+  const getRestaurantId = () => {
+    axios
+      .get(process.env.EXPO_PUBLIC_API_URL + "/restaurants/get-restaurant-id", {
+        params: {
+          uid: user.uid,
+        },
+      })
+      .then(async (res) => {
+        await AsyncStorage.setItem("my-restaurant-id", res.data._id);
+      });
+  };
+
+  const getStorageData = async () => {
+    const value = await AsyncStorage.getItem("my-restaurant-id");
+    if (user.uid && !value) {
+      getRestaurantId();
+    }
+  };
+
+  useEffect(() => {
+    getStorageData();
+  }, []);
+
+  const getMenuItems = () => {
     const cancelToken = axios.CancelToken.source();
 
     axios
@@ -52,8 +79,10 @@ const Home = () => {
     };
   };
 
+  
+
   useEffect(() => {
-    getItemsFromAPI();
+    getMenuItems();
   }, []);
 
   useEffect(() => {
@@ -75,7 +104,7 @@ const Home = () => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
-    getItemsFromAPI();
+    getMenuItems();
     setTimeout(() => {
       setRefreshing(false);
     }, 2000);
@@ -94,7 +123,7 @@ const Home = () => {
       width: 70,
       position: "absolute",
       bottom: 0,
-      top: responsiveHeight(85),
+      top: responsiveHeight(80),
       right: 10,
       height: 70,
       backgroundColor: "#fff",
@@ -124,22 +153,27 @@ const Home = () => {
           onChangeText={(params) => setSearchParam(params)}
         />
         <Menu>
-            <MenuTrigger
-              children={
-                <Avatar
+          <MenuTrigger
+            children={
+              <Avatar
                 animate
-                  source={{
-                    uri: "https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
-                  }}
-                />
-              }
-            />
-            <MenuOptions optionsContainerStyle={{width: 'auto'}}>
-              <MenuOption>
-              <Text onPress={() => logOut()} style={{ marginLeft: 10, height: 24, fontSize: 16 }}>Logout</Text>
-              </MenuOption>
-            </MenuOptions>
-          </Menu>
+                source={{
+                  uri: user.photoURL || "https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
+                }}
+              />
+            }
+          />
+          <MenuOptions optionsContainerStyle={{ width: "auto" }}>
+            <MenuOption>
+              <Text
+                onPress={() => logOut()}
+                style={{ marginLeft: 10, height: 24, fontSize: 16 }}
+              >
+                Logout
+              </Text>
+            </MenuOption>
+          </MenuOptions>
+        </Menu>
       </View>
       <View marginT-20>
         <FlatList

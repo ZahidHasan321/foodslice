@@ -3,7 +3,7 @@ import Map from "@/components/map/map";
 import MyTextField from "@/components/textfield/customTextfield";
 import restaurantTypes from "@/constants/restuarantCategory";
 import { useAuth } from "@/contexts/auth";
-import { AntDesign } from "@expo/vector-icons";
+import { AntDesign, Entypo } from "@expo/vector-icons";
 import { useTheme } from "@shopify/restyle";
 import axios from "axios";
 import { router } from "expo-router";
@@ -12,17 +12,27 @@ import React, { useState } from "react";
 import { StyleSheet } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import MapView, { Marker } from "react-native-maps";
+import * as ImagePicker from "expo-image-picker";
 import {
   responsiveHeight,
   responsiveWidth,
 } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Toast from "react-native-toast-message";
-import { Button, Colors, Picker, Text, View } from "react-native-ui-lib";
+import {
+  Button,
+  Colors,
+  Image,
+  Picker,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native-ui-lib";
+import useImgBB from "@/hooks/useIMGBB";
 
 const Registration = () => {
   const { colors } = useTheme();
-  const { user } = useAuth();
+  const { user, updateUserProfile } = useAuth();
   const [openMap, setOpenMap] = useState(null);
 
   const [restaurantInfo, setRestaurantInfo] = useState({
@@ -30,9 +40,10 @@ const Registration = () => {
     location: null,
     additionalLocationInfo: "",
     type: "",
+    coverImage: null,
   });
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (
       !restaurantInfo.name ||
       !restaurantInfo.location ||
@@ -47,27 +58,48 @@ const Registration = () => {
       return;
     }
 
-    axios
-      .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
-        params: {
-          uid: user.uid,
-        },
-      })
+    const imageUrl = await useImgBB(
+      restaurantInfo.coverImage.uri,
+      restaurantInfo?.name
+    );
+
+    if (typeof imageUrl !== "string") {
+      Toast.show({ type: "error", text1: "Image not found" });
+      return;
+    }
+
+    updateUserProfile(user.displayName, imageUrl || user.photoURL);
+    
+    await axios
+      .post(
+        process.env.EXPO_PUBLIC_API_URL + "/restaurants/register-restaurant",
+        {
+          ...restaurantInfo,
+          coverImage: imageUrl,
+          owner: user.uid,
+        }
+      )
       .then((res) => {
-        axios
-          .post(
-            process.env.EXPO_PUBLIC_API_URL +
-              "/restaurants/register-restaurant",
-            {
-              ...restaurantInfo,
-              owner: res.data._id,
-            }
-          )
-          .then((res) => {
-            console.log(res.data);
-          });
-      });
+        console.log(res.data);
+      })
+      .catch(e => {
+        console.log(e)
+      })
+
     router.replace("/restaurant/home");
+  };
+
+  const pickImage = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.All,
+      allowsEditing: true,
+      aspect: [4, 3],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setRestaurantInfo({ ...restaurantInfo, coverImage: result.assets[0] });
+    }
   };
 
   const styles = StyleSheet.create({
@@ -86,6 +118,7 @@ const Registration = () => {
           flexDirection: "column",
           alignItems: "center",
           margin: 30,
+          gap: 10,
         }}
       >
         <Text
@@ -195,6 +228,33 @@ const Registration = () => {
             <Picker.Item key={index} value={item} label={item} />
           ))}
         </Picker>
+
+        {restaurantInfo.coverImage ? (
+          <Image
+            source={{ uri: restaurantInfo.coverImage.uri }}
+            style={{
+              height: 200,
+              width: 200,
+              marginLeft: 20,
+              alignSelf: "flex-start",
+            }}
+          />
+        ) : (
+          <Entypo
+            style={{ width: responsiveWidth(75) }}
+            name="image"
+            size={24}
+            color="black"
+          />
+        )}
+        <TouchableOpacity
+          onPress={pickImage}
+          style={{ width: responsiveWidth(75) }}
+        >
+          <Text text70 style={{ color: colors.link }}>
+            Choose Image
+          </Text>
+        </TouchableOpacity>
 
         <RoundedButton
           buttonWidth={responsiveWidth(40)}

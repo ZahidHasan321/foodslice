@@ -1,25 +1,10 @@
-import { useAuth } from "@/contexts/auth";
-import React from "react";
-import { Text, ActivityIndicator } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import React from 'react'
+import { Text } from 'react-native-ui-lib'
 
-const App = () => {
-  const { isLoading, user } = useAuth();
-
-  if (isLoading || user === null) {
-    return (
-      <SafeAreaView>
-        <ActivityIndicator size="large" />
-      </SafeAreaView>
-    );
-  }
-
-
+const Home = () => {
   return (
-    <SafeAreaView>
-      <Text>Home</Text>
-    </SafeAreaView>
-  );
-};
+    <Text>Home</Text>
+  )
+}
 
-export default App;
+export default Home

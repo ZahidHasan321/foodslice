@@ -15,7 +15,6 @@ import {
   Button,
   Colors,
   Image,
-  Incubator,
   Modal,
   Picker,
   Text,
@@ -40,7 +39,6 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
     category: "",
     image: null,
   });
-
 
   const clearForm = () => {
     setItemInfo({
@@ -81,17 +79,18 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
         return imageUrl;
       } else {
         Toast.show({
-          type:'error',
-          text1:"Error uploading image to ImgBB"
-        })
+          type: "error",
+          text1: "Error uploading image to ImgBB",
+        });
       }
     } catch (error) {
       Toast.show({
-        type:'error',
-        text1: "Error uploading image: " +  error
-      })
+        type: "error",
+        text1: "Error uploading image: " + error,
+      });
     }
   };
+
 
   const pickImage = async () => {
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -108,7 +107,6 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
 
   const handleModelState = () => {
     handleModal(false);
-
   };
 
   const handleSubmit = async () => {
@@ -119,41 +117,36 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
       itemInfo.image === null ||
       itemInfo.ingredients.trim() == ""
     ) {
-      Toast.show({ type:'error', text1: "Field cannot be empty" });
+      Toast.show({ type: "error", text1: "Field cannot be empty" });
     } else {
       const imageUrl = await uploadImage(itemInfo.image.uri);
 
       if (typeof imageUrl !== "string") {
-        Toast.show({ type: 'error', text1: "Image not found" });
+        Toast.show({ type: "error", text1: "Image not found" });
         return;
       }
-      axios
-        .get(process.env.EXPO_PUBLIC_API_URL + "/users/getUser", {
-          params: {
-            uid: user.uid,
-          },
+  
+      await axios
+        .post(
+          process.env.EXPO_PUBLIC_API_URL + "/items/post-item",
+          { ...itemInfo, image: imageUrl, restaurant: user.uid },
+          {
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        )
+        .then((res) => {
+          res.data.value
+            ? (Toast.show({ type: "success", text1: res.data.message }),
+              clearForm(),
+              getItems())
+            : Toast.show({
+                type: "error",
+                text1: res.data.message,
+              });
         })
-        .then((userInfo) => {
-          axios
-            .post(
-              process.env.EXPO_PUBLIC_API_URL + "/items/post-item",
-              { ...itemInfo, image: imageUrl, restaurant: userInfo.data._id },
-              {
-                headers: {
-                  Accept: "application/json",
-                },
-              }
-            )
-            .then((res) => {
-              res.data.value
-                ? (Toast.show({type:'success', text1: res.data.message}), clearForm(), getItems())
-                : Toast.show({
-                  type: 'error',
-                  text1:res.data.message
-                });
-            })
-            .catch((e) => console.error(e));
-        });
+        .catch((e) => console.error(e));
     }
   };
 
@@ -263,7 +256,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
             }
             style={{
               ...styles.textField,
-              height: 100,
+              minHeight: 100,
               textAlignVertical: "top",
               paddingTop: 5,
               paddingBottom: 5,
@@ -280,7 +273,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
             }
             style={{
               ...styles.textField,
-              height: 100,
+              minHeight: 100,
               textAlignVertical: "top",
               paddingTop: 5,
               paddingBottom: 5,
@@ -316,7 +309,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
             style={{ marginTop: 30, marginBottom: 30 }}
           />
         </View>
-        <Toast/>
+        <Toast />
       </ScrollView>
     </Modal>
   );

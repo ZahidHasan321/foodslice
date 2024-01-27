@@ -1,20 +1,24 @@
 import RoundedButton from "@/components/button/roundedButton";
 import MyTextField from "@/components/textfield/customTextfield";
 import { useResponsiveProp, useTheme } from "@shopify/restyle";
-import { Link } from "expo-router";
-import { createUserWithEmailAndPassword, getAuth } from "firebase/auth";
+import axios from "axios";
+import { Link, router } from "expo-router";
+import {
+  createUserWithEmailAndPassword,
+  getAuth,
+  updateProfile,
+} from "firebase/auth";
 import React, { useState } from "react";
 import { Platform, StyleSheet } from "react-native";
-import Animated, { FadeIn } from "react-native-reanimated";
 import {
   responsiveHeight,
   responsiveWidth,
 } from "react-native-responsive-dimensions";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
-import axios from "axios";
-import Toast from "react-native-toast-message";
+import { useAuth } from "@/contexts/auth";
 
 const Signup = () => {
   const { colors } = useTheme();
@@ -22,7 +26,10 @@ const Signup = () => {
   const [password, setPassword] = useState("");
   const [username, setUserName] = useState("");
   const [confirmPass, setConfirmPass] = useState("");
+  const [profilePicture, setProfilePicture] = useState("");
   const [error, setError] = useState({ error: false, message: "" });
+
+  const { updateUserProfile } = useAuth();
 
   const clearState = () => {
     setEmail("");
@@ -42,16 +49,17 @@ const Signup = () => {
       password.trim() !== ""
     ) {
       if (password.trim() !== confirmPass.trim()) {
-        Toast.show({ type: "error", text1: "Password doesn't match"  });
+        Toast.show({ type: "error", text1: "Password doesn't match" });
         clearState();
         return;
       }
 
       createUserWithEmailAndPassword(auth, email.trim(), password.trim())
-        .then((userCredential) => {
+        .then(async (userCredential) => {
           const user = userCredential.user;
 
-          axios
+          updateUserProfile(username, null);
+          await axios
             .post(process.env.EXPO_PUBLIC_API_URL + "/users", {
               uid: user.uid,
               username: username,
@@ -60,6 +68,13 @@ const Signup = () => {
             })
             .then((res) => console.log(res.data))
             .catch((e) => console.log(e));
+
+          await updateProfile(auth.currentUser, {
+            displayName: username,
+            photoURL: profilePicture,
+          });
+
+         router.replace('/restaurantRegistration')
         })
         .catch((error) => {
           const errorCode = error.code;
@@ -102,7 +117,7 @@ const Signup = () => {
       ...Platform.select({
         android: {
           width: responsiveWidth(85),
-          height: responsiveHeight(60),
+          height: responsiveHeight(70),
         },
         web: {
           width: useResponsiveProp({ phone: 300, md: 400, lg: 420, xxl: 450 }),
@@ -196,6 +211,13 @@ const Signup = () => {
         <Text style={{ color: colors.text }}>Already have an account? </Text>
         <Link style={{ color: colors.link }} href={"/login"}>
           Log In
+        </Link>
+      </View>
+
+      <View style={{ display: "flex", flexDirection: "row", marginTop: 15 }}>
+        <Text style={{ color: colors.text }}>Are you a customer? </Text>
+        <Link style={{ color: colors.link }} href={"/signupCustomer"}>
+          sign up as customer
         </Link>
       </View>
     </SafeAreaView>
