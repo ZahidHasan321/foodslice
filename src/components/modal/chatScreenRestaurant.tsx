@@ -99,14 +99,15 @@ const ChatScreenRestaurant = ({
 
     updateMyMessage(messages[0].text, chat.customer._id);
 
+
     if (isConnected) {
       socket.emit("chatMessage", {
         restaurantId,
         customerId: chat.customer._id,
-        receiverId: chat.customer._id,
+        receiverId: chat.customer.uid,
         sender: "restaurant", // Assuming the restaurant is the sender
         content: messages[0].text,
-        senderId: restaurantId,
+        senderId: restaurantId
       });
 
       

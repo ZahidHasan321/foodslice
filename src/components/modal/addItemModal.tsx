@@ -31,6 +31,7 @@ interface Props {
 const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
   const { colors } = useTheme();
   const { user } = useAuth();
+  const [disabled, setDisabled] = useState(false);
   const [itemInfo, setItemInfo] = useState({
     name: "",
     ingredients: "",
@@ -119,10 +120,12 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
     ) {
       Toast.show({ type: "error", text1: "Field cannot be empty" });
     } else {
+      setDisabled(true)
       const imageUrl = await uploadImage(itemInfo.image.uri);
 
       if (typeof imageUrl !== "string") {
         Toast.show({ type: "error", text1: "Image not found" });
+        setDisabled(false)
         return;
       }
   
@@ -147,6 +150,8 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
               });
         })
         .catch((e) => console.error(e));
+
+        setDisabled(false)
     }
   };
 
@@ -260,6 +265,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
               textAlignVertical: "top",
               paddingTop: 5,
               paddingBottom: 5,
+              marginTop: 20
             }}
           />
 
@@ -277,6 +283,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
               textAlignVertical: "top",
               paddingTop: 5,
               paddingBottom: 5,
+              marginTop: 49
             }}
           />
           {itemInfo.image ? (
@@ -286,7 +293,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
             />
           ) : (
             <Entypo
-              style={{ alignSelf: "flex-start" }}
+              style={{ alignSelf: "flex-start",  marginTop:10  }}
               name="image"
               size={24}
               color="black"
@@ -294,7 +301,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
           )}
           <TouchableOpacity
             onPress={pickImage}
-            style={{ alignSelf: "flex-start" }}
+            style={{ alignSelf: "flex-start"}}
           >
             <Text text70 style={{ color: colors.link }}>
               Choose Image
@@ -303,6 +310,7 @@ const AddItemModal = ({ handleModal, modalVisibility, getItems }: Props) => {
 
           <Button
             label="Submit"
+            disabled={disabled}
             onPress={handleSubmit}
             backgroundColor={colors.secondary}
             size="large"

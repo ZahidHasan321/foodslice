@@ -34,6 +34,7 @@ const Registration = () => {
   const { colors } = useTheme();
   const { user, updateUserProfile } = useAuth();
   const [openMap, setOpenMap] = useState(null);
+  const [ disabled, setDisabled ] = useState(false);
 
   const [restaurantInfo, setRestaurantInfo] = useState({
     name: "",
@@ -58,6 +59,8 @@ const Registration = () => {
       return;
     }
 
+    setDisabled(true)
+
     const imageUrl = await useImgBB(
       restaurantInfo.coverImage.uri,
       restaurantInfo?.name
@@ -65,6 +68,7 @@ const Registration = () => {
 
     if (typeof imageUrl !== "string") {
       Toast.show({ type: "error", text1: "Image not found" });
+      setDisabled(false);
       return;
     }
 
@@ -80,13 +84,14 @@ const Registration = () => {
         }
       )
       .then((res) => {
-        console.log(res.data);
+        Toast.show({type:'success', text1:'Registration successful'})
+        router.replace("/restaurant/home");
       })
       .catch(e => {
         console.log(e)
       })
 
-    router.replace("/restaurant/home");
+    setDisabled(false);
   };
 
   const pickImage = async () => {

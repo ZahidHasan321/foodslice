@@ -28,7 +28,7 @@ const Home = () => {
   const [searchParam, setSearchParam] = useState("");
   const [modalVisibility, setModalVisibility] = useState(false);
   const [itemList, setItemList] = useState([]);
-  const [searchedData, setSearchedData] = useState([]);
+  const [searchedData, setSearchedData] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
 
   const handleFabButtonPress = () => {
@@ -43,12 +43,12 @@ const Home = () => {
         },
       })
       .then(async (res) => {
-        await AsyncStorage.setItem("my-restaurant-id", res.data._id);
+        await AsyncStorage.setItem("my-restaurant-id "+ user.uid, res.data._id);
       });
   };
 
   const getStorageData = async () => {
-    const value = await AsyncStorage.getItem("my-restaurant-id");
+    const value = await AsyncStorage.getItem("my-restaurant-id "+ user.uid);
     if (user.uid && !value) {
       getRestaurantId();
     }
@@ -58,10 +58,10 @@ const Home = () => {
     getStorageData();
   }, []);
 
-  const getMenuItems = () => {
+  const getMenuItems = async () => {
     const cancelToken = axios.CancelToken.source();
 
-    axios
+    await axios
       .get(process.env.EXPO_PUBLIC_API_URL + "/items/getItems", {
         cancelToken: cancelToken.token,
         params: {
@@ -70,16 +70,14 @@ const Home = () => {
       })
       .then((res) => {
         setItemList(res.data);
-        setSearchedData(res.data);
       })
       .catch((e) => console.log(e));
 
+    setRefreshing(false);
     return () => {
       cancelToken.cancel();
     };
   };
-
-  
 
   useEffect(() => {
     getMenuItems();
@@ -87,14 +85,14 @@ const Home = () => {
 
   useEffect(() => {
     if (searchParam !== "") {
-      const filteredData = searchedData.filter((item) => {
+      const filteredData = itemList.filter((item) => {
         return item.name.toLowerCase().includes(searchParam.toLowerCase())
           ? item
           : null;
       });
       setSearchedData(filteredData);
     } else {
-      setSearchedData(itemList);
+      setSearchedData(null);
     }
   }, [searchParam]);
 
@@ -104,10 +102,13 @@ const Home = () => {
 
   const onRefresh = useCallback(() => {
     setRefreshing(true);
+   
     getMenuItems();
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
+
+    setTimeout(()=> {
+      setRefreshing(false)
+    },2000);
+    
   }, []);
 
   const renderItem = (item) => {
@@ -123,7 +124,7 @@ const Home = () => {
       width: 70,
       position: "absolute",
       bottom: 0,
-      top: responsiveHeight(80),
+      top: responsiveHeight(85),
       right: 10,
       height: 70,
       backgroundColor: "#fff",
@@ -158,7 +159,9 @@ const Home = () => {
               <Avatar
                 animate
                 source={{
-                  uri: user.photoURL || "https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
+                  uri:
+                    user?.photoURL ||
+                    "https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
                 }}
               />
             }
@@ -178,7 +181,7 @@ const Home = () => {
       <View marginT-20>
         <FlatList
           nestedScrollEnabled
-          data={searchedData}
+          data={searchedData || itemList}
           renderItem={renderItem}
           contentContainerStyle={{
             flex: 1,

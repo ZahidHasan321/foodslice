@@ -5,8 +5,6 @@ import axios from "axios";
 import { useFocusEffect, useNavigation } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { FlatList, Modal, StyleSheet } from "react-native";
-import { ScrollView } from "react-native-gesture-handler";
-import { responsiveHeight } from "react-native-responsive-dimensions";
 import { StarRatingDisplay } from "react-native-star-rating-widget";
 import {
   Avatar,
@@ -164,7 +162,7 @@ const ShowAllRestaurantReviewModal = ({ isVisible, restaurantId, onClose }) => {
                 ({numberOfPeopleRated})
               </Text>
             </Text>
-            <StarRatingDisplay rating={averageRating} starSize={24} />
+            <StarRatingDisplay rating={averageRating} starSize={20} />
           </View>
 
           <View>
@@ -174,21 +172,21 @@ const ShowAllRestaurantReviewModal = ({ isVisible, restaurantId, onClose }) => {
             <StarRatingDisplay
               style={{ marginBottom: 10 }}
               rating={averageFoodQualityScore}
-              starSize={22}
+              starSize={18}
             />
 
             <Text style={{ fontWeight: "500", marginLeft: 10 }}>Service</Text>
             <StarRatingDisplay
               style={{ marginBottom: 10 }}
               rating={averageServiceScore}
-              starSize={22}
+              starSize={18}
             />
 
             <Text style={{ fontWeight: "500", marginLeft: 10 }}>Ambiance</Text>
             <StarRatingDisplay
               style={{ marginBottom: 10 }}
               rating={averageAmbianceScore}
-              starSize={22}
+              starSize={18}
             />
           </View>
         </Card>

@@ -15,7 +15,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Text, View } from "react-native-ui-lib";
 import app from "../../configs/firebaseConfig";
 
-const Signup = () => {
+const Signin = () => {
   const { colors } = useTheme();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -189,4 +189,4 @@ const Signup = () => {
   );
 };
 
-export default Signup;
+export default Signin;

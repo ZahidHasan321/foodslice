@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import axios from "axios";
-import { Tabs, useLocalSearchParams, useNavigation } from "expo-router";
+import { Tabs, router, useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { FlatList } from "react-native";
 import { TouchableOpacity } from "react-native-gesture-handler";
@@ -14,6 +14,10 @@ const ItemsOfType = () => {
   const [loading, setLoading] = useState(true);
 
   const navigation = useNavigation();
+
+  const handleRestaurantCardPress = (name, restaurantId) => {
+    router.push({ pathname: `/customer/${name}`, params: { restaurantId } });
+  };
 
   useEffect(() => {
     const cancelTokenSource = axios.CancelToken.source();
@@ -74,6 +78,9 @@ const ItemsOfType = () => {
           <Card
             key={restaurant._id}
             style={{ width: responsiveWidth(85), margin: 10 }}
+            onPress={() => {
+              handleRestaurantCardPress(restaurant.name, restaurant._id)
+            }}
           >
             <Card.Image
               source={{ uri: restaurant.coverImage }}

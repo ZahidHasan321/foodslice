@@ -22,11 +22,10 @@ import * as ImagePicker from "expo-image-picker";
 import { useTheme } from "@shopify/restyle";
 import axios from "axios";
 
-import { Toast } from "react-native-ui-lib/src/incubator";
-
 import _ from "lodash";
 import restaurantCategories from "@/constants/foodCategory";
 import useImgBB from "@/hooks/useIMGBB";
+import Toast from "react-native-toast-message";
 
 const styles = StyleSheet.create({
   input: {
@@ -40,6 +39,7 @@ const styles = StyleSheet.create({
 
 const EditItem = ({ open, handleModalClose, item }) => {
   const [editedItem, setEditedItem] = useState(item);
+  const [ disabled, setDisabled ] = useState(false)
   const { colors } = useTheme();
 
   const [image, setImage] = useState(null);
@@ -80,13 +80,14 @@ const EditItem = ({ open, handleModalClose, item }) => {
       editedItem.image === null ||
       editedItem.ingredients.trim() == ""
     ) {
-      setIsError({ value: true, message: "Field cannot be empty" });
+      Toast.show({type:'error', text1:"Fields cannot be empty"});
     } else {
+      setDisabled(true);
       const imageUrl = (await image)
         ? await useImgBB(image.uri, editedItem.name)
         : editedItem.image;
 
-      axios
+      await axios
         .post(
           process.env.EXPO_PUBLIC_API_URL + "/items/update-item",
           { ...editedItem, image: imageUrl },
@@ -97,9 +98,14 @@ const EditItem = ({ open, handleModalClose, item }) => {
           }
         )
         .then((res) => {
-          res.data.value ? setIsSuccess(res.data) : setIsError(res.data);
+          res.data.value
+            ? Toast.show({ type: "success", text1: "updated successfully" })
+            : Toast.show({ type: "error", text1: "Failed to update" });
         })
         .catch((e) => console.error(e));
+
+        setDisabled(false);
+        
     }
   };
 
@@ -184,7 +190,7 @@ const EditItem = ({ open, handleModalClose, item }) => {
             display: "flex",
             flexDirection: "row",
             width: "100%",
-            gap:4,
+            gap: 4,
             alignItems: "center",
           }}
         >
@@ -281,6 +287,7 @@ const EditItem = ({ open, handleModalClose, item }) => {
         </View>
 
         <Button
+          disabled = {disabled}
           label="Submit"
           onPress={handleSubmit}
           backgroundColor={colors.secondary}
@@ -293,40 +300,7 @@ const EditItem = ({ open, handleModalClose, item }) => {
           }}
         />
       </SafeAreaView>
-
-      <Toast
-        message={isSuccess.value ? isSuccess.message : ""}
-        visible={isSuccess.value ? true : false}
-        position="top"
-        swipeable={true}
-        autoDismiss={2000}
-        onDismiss={() => clearState()}
-        zIndex={10}
-        preset={
-          isSuccess.value
-            ? Incubator.ToastPresets.SUCCESS
-            : Incubator.ToastPresets.FAILURE
-        }
-        containerStyle={{ top: 0 }}
-        centerMessage
-      />
-
-      <Toast
-        message={isError.value ? isError.message : ""}
-        visible={isError.value ? true : false}
-        position="top"
-        swipeable={true}
-        autoDismiss={2000}
-        zIndex={2}
-        onDismiss={() => clearState()}
-        preset={
-          isError.value
-            ? Incubator.ToastPresets.FAILURE
-            : Incubator.ToastPresets.SUCCESS
-        }
-        containerStyle={{ top: 0 }}
-        centerMessage
-      />
+      <Toast />
     </Modal>
   );
 };

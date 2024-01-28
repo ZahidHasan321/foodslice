@@ -1,6 +1,7 @@
 React;
 import ChatScreen from "@/components/modal/chatScreen";
 import ShowAllRestaurantReviewModal from "@/components/modal/restaurantCommentModal";
+import RestaurantMoreInfoModal from "@/components/modal/restaurantMoreInfoModal";
 import ReviewModal from "@/components/modal/restaurantReviewModal";
 import { useAuth } from "@/contexts/auth";
 import { Ionicons } from "@expo/vector-icons";
@@ -8,10 +9,12 @@ import { useTheme } from "@shopify/restyle";
 import axios from "axios";
 import { useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useEffect, useState } from "react";
+import { ActivityIndicator } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StarRatingDisplay } from "react-native-star-rating-widget";
 import Toast from "react-native-toast-message";
+
 import {
   Avatar,
   Card,
@@ -29,11 +32,13 @@ const DynamicRestaurantPage = () => {
   const [myReview, setMyReview] = useState(null);
   const [openWriteAReview, setOpenWriteAReviw] = useState(false);
   const [openShowAllReviews, setShowAllReviews] = useState(false);
+  const [showRestaurantMoreInfoModal, setShowRestaurantMoreInfoModal] =
+    useState<boolean>(false);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
   const [location, setLocation] = useState(null);
   const [openChatModal, setOpenChatModal] = useState(false);
-  const [userId, setUserId] = useState(null)
+  const [userId, setUserId] = useState(null);
 
   const navigation = useNavigation();
   const { colors } = useTheme();
@@ -47,7 +52,7 @@ const DynamicRestaurantPage = () => {
           {
             params: {
               restaurant: restaurantId,
-              user: user.uid
+              user: user.uid,
             },
             cancelToken: source.token,
           }
@@ -56,7 +61,7 @@ const DynamicRestaurantPage = () => {
         setItems(res.data.items);
         setRestaurant(res.data.restaurant);
         setMyReview(res.data.myReview);
-        setUserId(res.data.user._id)
+        setUserId(res.data.user._id);
 
         axios
           .get("https://api.bigdatacloud.net/data/reverse-geocode-client", {
@@ -130,7 +135,7 @@ const DynamicRestaurantPage = () => {
   }));
 
   const handleMoreInfoBTN = () => {
-    console.log("pressed");
+    setShowRestaurantMoreInfoModal(true);
   };
 
   const renderTabPage = (category) => {
@@ -227,7 +232,8 @@ const DynamicRestaurantPage = () => {
           <View>
             <Text>{location?.locality}</Text>
             <Text style={{ fontSize: 14, fontWeight: "400" }}>
-              <Text style={{ fontWeight:'500'}}>Additional info:</Text> {restaurant?.additionalLocationInfo}
+              <Text style={{ fontWeight: "500" }}>Additional info:</Text>{" "}
+              {restaurant?.additionalLocationInfo}
             </Text>
           </View>
           <TouchableOpacity onPress={handleMoreInfoBTN}>
@@ -245,7 +251,7 @@ const DynamicRestaurantPage = () => {
           }}
         >
           {myReview && (
-            <Card style={{ padding: 10 }}>
+            <Card style={{ padding: 4 }}>
               <Avatar
                 source={{
                   uri:
@@ -297,24 +303,36 @@ const DynamicRestaurantPage = () => {
         </View>
       </View>
 
-      {items.length > 0 && (
-        <TabController items={categoryList}>
-          <TabController.TabBar />
-          <View flex>
-            {Object.keys(groupedItems).map((category, index) => (
-              <TabController.TabPage key={index} index={index} lazy>
-                {renderTabPage(category)}
-              </TabController.TabPage>
-            ))}
-          </View>
-        </TabController>
+      {items.length > 0 ? (
+        items.length > 1 ? ( // Render TabController for multiple categories
+          <TabController items={categoryList}>
+            <TabController.TabBar />
+
+            <View flex>
+              {Object.keys(groupedItems).map((category, index) => (
+                <TabController.TabPage key={index} index={index} lazy>
+                  {renderTabPage(category)}
+                </TabController.TabPage>
+              ))}
+            </View>
+          </TabController>
+        ) : (
+          // Render content for a single category
+          <View flex>{renderTabPage(items[0].category)}</View>
+        )
+      ) : (
+        // Render placeholder or loading state when items are empty
+        <Text>No item found</Text>
       )}
+
+
+
       <TouchableOpacity
         style={{
           position: "absolute",
           bottom: 16,
           right: 16,
-          //backgroundColor:'blue', // Replace with your desired background color
+          backgroundColor: "#007AFF", // Your desired background color
           borderRadius: 50, // Make it round
           padding: 16,
           elevation: 12,
@@ -324,7 +342,7 @@ const DynamicRestaurantPage = () => {
           setOpenChatModal(true);
         }}
       >
-        <Ionicons name="chatbox" size={32} />
+        <Ionicons name="chatbox" size={32} color="white" />
       </TouchableOpacity>
 
       <ChatScreen
@@ -333,6 +351,7 @@ const DynamicRestaurantPage = () => {
           setOpenChatModal(false);
         }}
         restaurantId={restaurant._id}
+        reciverId={restaurant?.owner?.uid}
         name={restaurant.name}
         profilePicture={restaurant.coverImage}
         customerId={userId}
@@ -346,6 +365,12 @@ const DynamicRestaurantPage = () => {
         isVisible={openShowAllReviews}
         onClose={() => setShowAllReviews(false)}
         restaurantId={restaurantId.restaurantId}
+      />
+
+      <RestaurantMoreInfoModal
+        isVisible={showRestaurantMoreInfoModal}
+        onClose={() => setShowRestaurantMoreInfoModal(false)}
+        restaurant={restaurant}
       />
     </SafeAreaView>
   );

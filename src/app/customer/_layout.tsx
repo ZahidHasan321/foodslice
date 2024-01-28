@@ -13,11 +13,21 @@ export default function AppLayout() {
       headerShown:false
     }}>
       <Tabs.Screen name="home" options={{
+        headerShown:true,
+        title:'Foodslice',
         tabBarIcon: () => <Ionicons name="home" size={24} />
       }}/>
+      <Tabs.Screen name="notifications" options={{
+        headerShown:true,
+         title:'inbox',
+        tabBarIcon: () => <Ionicons name="notifications" size={24} />
+      }}/>
+
       <Tabs.Screen name="profile" options={{
+       
         tabBarIcon: () => <Ionicons name="person" size={24} />
       }}/>
+
 
       <Tabs.Screen name="[restaurant]" options={{
         tabBarStyle:{display:'none'},

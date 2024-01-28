@@ -1,9 +1,9 @@
 // ChatScreen.js
 
+import { useSocket } from "@/app/_layout";
 import { useAuth } from "@/contexts/auth";
 import usePushNotifications from "@/hooks/usePushNotifications";
 import { Ionicons } from "@expo/vector-icons";
-import { useTheme } from "@react-navigation/native";
 import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, StyleSheet } from "react-native";
@@ -15,35 +15,23 @@ import {
   TouchableOpacity,
   View,
 } from "react-native-ui-lib";
-import { io } from "socket.io-client";
 
 const ChatScreen = ({
   isVisible,
   restaurantId,
   onClose,
+  reciverId,
   name,
   customerId,
   profilePicture,
 }) => {
-  const { colors } = useTheme();
   const { user } = useAuth();
+  const { isConnected, socket } = useSocket()
 
   const [messages, setMessages] = useState([]);
-  const socket = io(process.env.EXPO_PUBLIC_API_URL);
-  const [isConnected, setIsConnected] = useState(socket.connected);
-  const { schedulePushNotification } = usePushNotifications();
+
 
   useEffect(() => {
-    function onConnect() {
-      setIsConnected(true);
-    }
-
-    function onDisconnect() {
-      setIsConnected(false);
-    }
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-
     axios
       .get(process.env.EXPO_PUBLIC_API_URL + "/chats/chat-history", {
         params: {
@@ -68,22 +56,10 @@ const ChatScreen = ({
           }))
         );
       });
-
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-    };
-  }, []);
+  }, [restaurantId]);
 
   useEffect(() => {
     if (isConnected && socket) {
-      socket.emit("joinChat", {
-        senderId: customerId,
-      });
-
-      // socket.on("chatHistory", (chatMessages) => {
-
-      // });
 
       const handleGetMessage = (message) => {
         if (message.senderId === restaurantId) {
@@ -107,15 +83,12 @@ const ChatScreen = ({
               ? GiftedChat.append(prevMessages, [newMessage])
               : [newMessage];
           });
-
-          schedulePushNotification(name, message.content);
         }
       };
 
       socket.on("getMessage", handleGetMessage);
       return () => {
         // Cleanup: Remove the event listener when component unmounts or when dependencies change
-        socket.off("getMessage", handleGetMessage);
       };
     }
   }, [isConnected, customerId, restaurantId]);
@@ -125,12 +98,11 @@ const ChatScreen = ({
       setMessages((previousMessages) =>
         GiftedChat.append(previousMessages, messages)
       );
-
       if (isConnected) {
         socket.emit("chatMessage", {
           restaurantId,
           customerId,
-          receiverId: restaurantId,
+          receiverId: reciverId,
           senderId: customerId,
           sender: "customer", // Assuming the customer is the sender
           content: messages[0].text,

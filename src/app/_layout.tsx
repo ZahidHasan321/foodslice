@@ -1,16 +1,22 @@
+import { Provider, useAuth } from "@/contexts/auth";
+import { SocketContext } from "@/contexts/socketProvider";
+import usePushNotifications from "@/hooks/usePushNotifications";
+import { socket } from "@/service/socket";
+import { darkTheme, lightTheme } from "@/themes/theme";
 import { ThemeProvider } from "@shopify/restyle";
 import { Slot } from "expo-router";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaProvider } from "react-native-safe-area-context";
-
-import { Provider, useAuth } from "@/contexts/auth";
-import { darkTheme, lightTheme } from "@/themes/theme";
-import { setBackgroundColorAsync } from "expo-system-ui";
-import React, { useCallback, useEffect, useState } from "react";
-import { Appearance } from "react-native";
-import { MenuProvider } from "react-native-popup-menu";
-import Toast from "react-native-toast-message";
 import * as SplashScreen from "expo-splash-screen";
+import { setBackgroundColorAsync } from "expo-system-ui";
+import React, { useContext, useEffect, useState } from "react";
+import { Appearance, StatusBar } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { MenuProvider } from "react-native-popup-menu";
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
+
+export function useSocket() {
+  return useContext(SocketContext);
+}
 
 SplashScreen.preventAutoHideAsync();
 
@@ -24,27 +30,46 @@ export default function Layout() {
 
 function RootLayout() {
   const colorScheme = Appearance.getColorScheme();
-  const [appIsReady, setAppIsReady] = useState(false);
   const { authInitialized, user } = useAuth();
 
+  const [isConnected, setIsConnected] = useState(socket.connected);
+  const [message, setMessage] = useState(null);
+  const { schedulePushNotification } = usePushNotifications();
+
   useEffect(() => {
-    if (authInitialized && user) {
-      setAppIsReady(true);
+    if(authInitialized && user && isConnected){
+      socket.emit("joinChat", {
+        senderId: user.uid
+      })
     }
+  },[authInitialized, user, isConnected])
+
+  useEffect(() => {
+    function onConnect() {
+      setIsConnected(true);
+    }
+
+    function onDisconnect() {
+      setIsConnected(false);
+    }
+
+    function onGetMessage(message) {
+      schedulePushNotification(user?.displayName, message.content, user?.uid);
+    }
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('getMessage', onGetMessage);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('getMessage', onGetMessage);
+    };
   }, [authInitialized, user]);
 
-  const onLayoutRootView = useCallback(async () => {
-    if (appIsReady) {
-      // This tells the splash screen to hide immediately! If we call this after
-      // `setAppIsReady`, then we may see a blank screen while the app is
-      // loading its initial state and rendering its first pixels. So instead,
-      // we hide the splash screen once we know the root view has already
-      // performed layout.
-      await SplashScreen.hideAsync();
-    }
-  }, [appIsReady]);
 
-  if (!appIsReady) {
+  if (!authInitialized && !user) {
     return null;
   }
 
@@ -54,18 +79,20 @@ function RootLayout() {
       : lightTheme.colors.mainBackground
   );
 
-  if (!authInitialized && !user) return null;
-
+  
   return (
     <ThemeProvider theme={colorScheme === "dark" ? darkTheme : lightTheme}>
-      <MenuProvider>
-        <GestureHandlerRootView style={{ flex: 1 }}>
-          <SafeAreaProvider onLayout={onLayoutRootView}>
-            <Slot/>
-            <Toast />
-          </SafeAreaProvider>
-        </GestureHandlerRootView>
-      </MenuProvider>
+      <StatusBar barStyle="dark-content" />
+      <SocketContext.Provider value={{socket, isConnected}}>
+        <MenuProvider>
+          <GestureHandlerRootView style={{ flex: 1 }}>
+            <SafeAreaProvider>
+              <Slot />
+              <Toast />
+            </SafeAreaProvider>
+          </GestureHandlerRootView>
+        </MenuProvider>
+      </SocketContext.Provider>
     </ThemeProvider>
   );
 }

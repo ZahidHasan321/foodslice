@@ -1,50 +1,30 @@
 import ChatScreenRestaurant from "@/components/modal/chatScreenRestaurant";
-import usePushNotifications from "@/hooks/usePushNotifications";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import Constants from 'expo-constants';
 import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native-gesture-handler";
 import { responsiveFontSize } from "react-native-responsive-dimensions";
 import { Card, Text, View } from "react-native-ui-lib";
-import { io } from "socket.io-client";
+import { useSocket } from "../_layout";
+import { useAuth } from "@/contexts/auth";
 
 
 const ChatList = () => {
   const [restaurantId, setRestaurantId] = useState(null);
-  const socket = io(process.env.EXPO_PUBLIC_API_URL);
+  const { socket, isConnected } = useSocket() 
   const [chatList, setChatList] = useState(null);
-  const [isConnected, setIsConnected] = useState(socket.connected);
   const [showChatScreen, setShowChatScreen] = useState(false);
   const [chat, setChat] = useState(null);
   const [newMessage, setNewMessage] = useState(null);
-
-  //notification
-  const { schedulePushNotification } = usePushNotifications();
-
+  const { user } = useAuth();
+  
   const getStorageData = async () => {
-    const value = await AsyncStorage.getItem("my-restaurant-id");
+    const value = await AsyncStorage.getItem("my-restaurant-id "+ user.uid);
     setRestaurantId(value);
   };
 
   useEffect(() => {
     getStorageData();
-
-    function onConnect() {
-      setIsConnected(true);
-    }
-
-    function onDisconnect() {
-      setIsConnected(false);
-    }
-
-    socket.on("connect", onConnect);
-    socket.on("disconnect", onDisconnect);
-
-    return () => {
-      socket.off("connect", onConnect);
-      socket.off("disconnect", onDisconnect);
-    };
   }, []);
 
   const getChatHistory = () => {
@@ -60,29 +40,18 @@ const ChatList = () => {
       });
   };
 
+  console.log(restaurantId);
+
   useEffect(() => {
     if (restaurantId) {
       getChatHistory();
     }
   }, [restaurantId]);
 
+
   useEffect(() => {
     if (isConnected && restaurantId) {
-      socket.emit("joinChat", {
-        senderId: restaurantId,
-      });
-
       socket.on("getMessage", (message) => {
-        // if (chat && message.senderId === chat.customer._id) {
-        //   chat.messages.unshift({
-        //     sender: message.sender,
-        //     content: message.content,
-        //     timestamp: message.timestamp,
-        //   });
-        // }
-
-  
-
         setNewMessage(message);
         
         setChatList((prevMap) => {
@@ -111,7 +80,6 @@ const ChatList = () => {
               ...updatedMap,
             ]);
 
-            schedulePushNotification((chat as any).customer.username, message.content);
 
             return newMap;
           } else {
@@ -125,7 +93,6 @@ const ChatList = () => {
     }
 
     return () => {
-      socket.off("getMessage");
     };
   }, [isConnected, socket, restaurantId]);
 
@@ -136,6 +103,7 @@ const ChatList = () => {
 
       if (updatedMap.has(customerId)) {
         // Delete the existing entry
+
         const chat = updatedMap.get(customerId);
         updatedMap.delete(customerId);
 

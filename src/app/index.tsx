@@ -1,9 +1,9 @@
 import React from 'react'
-import { Text } from 'react-native-ui-lib'
+import { LoaderScreen, Text } from 'react-native-ui-lib'
 
 const Home = () => {
   return (
-    <Text>Home</Text>
+    <LoaderScreen message='Loading'/>
   )
 }
 

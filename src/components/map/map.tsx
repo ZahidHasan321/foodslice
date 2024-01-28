@@ -74,7 +74,7 @@ const Map = ({ open, closeMap, handleSaveLocation}) => {
   return (
     <Modal
       visible={open}
-      onBackgroundPress={() => closeMap()}
+      onRequestClose={() => closeMap()}
       style={{ flex: 1 }}
     >
       <MapView
@@ -90,7 +90,6 @@ const Map = ({ open, closeMap, handleSaveLocation}) => {
             longitudeDelta: 0.0421,
           }}
         onLongPress={handleLongPress}
-        followsUserLocation={true}
       >
                  {marker && (
           <Marker
@@ -99,8 +98,8 @@ const Map = ({ open, closeMap, handleSaveLocation}) => {
             title={locationName || 'Selected Location'}
           />
         )}
-
       </MapView>
+
       {!marker && (
         <View style={styles.hintContainer}>
           <Text style={styles.hintText}>Long press on the map to add a marker</Text>

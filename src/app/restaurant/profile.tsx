@@ -12,7 +12,6 @@ const Profile = () => {
   const [ profilePicture, setProfilePicture ] = useState(null)
   const [username, setUserName] = useState(null)
 
-
   const pickImage = async () => {
     // No permissions request is necessary for launching the image library
     let result = await ImagePicker.launchImageLibraryAsync({
@@ -44,8 +43,8 @@ const Profile = () => {
                 <AntDesign name="edit" size={24}/>
               </View>
             </TouchableOpacity>
-            <Text style={styles.userName}>{user.displayName}</Text>
-            <Text style={styles.userEmail}>{user.email}</Text>
+            <Text style={styles.userName}> {user.displayName} </Text>
+            <Text style={styles.userEmail}> {user.email} </Text>
             {/* Add more user information like address, etc., as needed */}
             <Button
               label="Sign Out"

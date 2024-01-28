@@ -28,7 +28,9 @@ export default function AppLayout() {
                 <Avatar
                   animate
                   source={{
-                    uri: user.photoURL ||"https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
+                    uri:
+                      user.photoURL ||
+                      "https://cdn.pixabay.com/photo/2018/08/28/13/29/avatar-3637561_1280.png",
                   }}
                 />
               }
@@ -47,6 +49,8 @@ export default function AppLayout() {
         ),
       }}
     >
+      
+
       <Tabs.Screen
         name="home"
         options={{
@@ -55,9 +59,9 @@ export default function AppLayout() {
         }}
       />
       <Tabs.Screen
-        name="reservations"
+        name="reviews"
         options={{
-          tabBarIcon: () => <Ionicons name="clipboard" size={24} />,
+          tabBarIcon: () => <Ionicons name="star" size={24} />,
         }}
       />
       <Tabs.Screen
@@ -73,6 +77,15 @@ export default function AppLayout() {
           tabBarIcon: () => <Ionicons name="chatbox" size={24} />,
         }}
       />
+
+<Tabs.Screen
+        name="notifications"
+        options={{
+          title: "inbox",
+          tabBarIcon: () => <Ionicons name="notifications" size={24} />,
+        }}
+      />
+
     </Tabs>
   );
 }
