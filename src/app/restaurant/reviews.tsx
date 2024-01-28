@@ -1,13 +1,14 @@
 import { useAuth } from "@/contexts/auth";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { FlatList } from "react-native-gesture-handler";
+import { FlatList, RefreshControl, Text, View } from "react-native";
+import { Avatar, Card } from "react-native-ui-lib";
 import { StarRatingDisplay } from "react-native-star-rating-widget";
-import { Avatar, Card, Text, View } from "react-native-ui-lib";
 
 const Reviews = () => {
   const { user } = useAuth();
-  const [ reviews, setReviews ] = useState(null)
+  const [reviews, setReviews] = useState(null);
+  const [refreshing, setRefreshing] = useState(false);
 
   const getReviewsData = () => {
     axios
@@ -22,7 +23,18 @@ const Reviews = () => {
       )
       .then((res) => {
         setReviews(res.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching reviews:", error);
+      })
+      .finally(() => {
+        setRefreshing(false);
       });
+  };
+
+  const onRefresh = () => {
+    setRefreshing(true);
+    getReviewsData();
   };
 
   useEffect(() => {
@@ -72,12 +84,21 @@ const Reviews = () => {
     </Card>
   );
 
-  return(
-    <FlatList 
-    data={reviews}
-    keyExtractor={(item) => item._id}
-    renderItem={renderItem}
+  return (
+    <FlatList
+      data={reviews}
+      keyExtractor={(item) => item._id}
+      renderItem={renderItem}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+      ListEmptyComponent={
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+          <Text>No reviews found</Text>
+        </View>
+      }
     />
-  )
+  );
 };
+
 export default Reviews;
